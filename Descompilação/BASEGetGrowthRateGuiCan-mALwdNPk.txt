@@ -1,0 +1,12 @@
+int BASE_GetGrowthRate(STRUCT_ITEM* item) //00404ff0 - ok - atualizada(rates e lvl 120)
+{
+	if(item->Index < 2360 || item->Index >= 2390)
+		return FALSE;
+
+	int montLvl = item->EF2;
+	montLvl = montLvl / 10;
+
+	int rate = g_pSancRate[3][montLvl];
+
+	return rate;
+}

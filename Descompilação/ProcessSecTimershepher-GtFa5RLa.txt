@@ -1,0 +1,718 @@
+struct _AUTH_GAME{
+	int 	Packet_Type;	//	4
+	int		Result;			//	4 
+	char	S_KEY[32];		//	4*8	 
+	char	Session[32];	//  4*8
+	char	User_CC[4];		//	4
+	char	User_No[20];	//	4*5
+	char	User_ID[52];	//  4*13
+	char	User_IP[24];	//  4*6
+	char	User_Gender;	
+	char	User_Status[3];	//	4	
+	char	User_PayType[4];//	2 ?
+	int 	User_Age;		//  4
+	int 	Game_No;		//  4
+	char	Bill_PayType[2];
+	char	Bill_Method[2];	//	4
+	char	Bill_Expire[12];//	4*3 	
+	int 	Bill_Remain;	//	4
+};
+
+void ProcessSecTimer()
+{
+	static int ServerDown = NULL; // 1.2 - 004c7bcc
+	static int Billing = NULL; // 1.2 - 004c7ba0
+	static int UserCount = NULL; // 1.2 - 004C7BD0
+	static char temp[1024]; // 1.2 - 751C928
+	static char *g_pMessageStringTable[512];
+	static HWND hWndMain; // 1.2 - 24A5FC0
+	static int SecCounter; // 1.2 - 758FAE8
+	static int CurrentTime; // 1.2 - 758FA88
+	static int BillCounter; // 1.2 - 758FAB0
+	static st_Socket BillServerSocket; // 1.2 - 1D25FA0
+	static char BillServerAddress[32];
+	static int SaveCount; // 1.2 - 4C7BD4
+	static int BillServerPort;
+	static int g_Hour = NULL; // 1.2 - 0758fab8 
+	static char IP [4] = {0, 0, 0, 0};
+	static int BrState = NULL; // 1.2 - 758FB10
+	static int BrItem = NULL; // 1.2 - 758FADC
+	static int pMobGrid[4096][4096]; // 1.2 - 24A5FC4;
+	static int BrMod = NULL; // 1.2 - 758FB18
+	BYTE LOCAL_49[196];
+
+	if(ServerDown == 120)
+	{
+		if(Billing != 0)
+		{
+			memset(&LOCAL_49, 0, 196);
+			
+			SendBilling2((_AUTH_GAME*)&LOCAL_49, 4);
+			Billing = 0;
+		}
+
+		while(1)
+		{
+			if(UserCount >= MAX_PLAYER)
+			{
+				//Log("sys, server down complete", "-system", 0);
+				// Checagem com hFont
+				if(*(DWORD*)(0x00758FB28) != 0) // 1.2 
+				{
+					DeleteObject((HGDIOBJ*)*(DWORD*)(0x0758FB28));
+
+					*(DWORD*)0x00758FB28 = 0;
+				}
+
+				PostQuitMessage(0);
+				return;
+			}
+			if(Users[UserCount].Status != 0)
+				break;
+		
+			UserCount ++;
+		}
+		
+		Users[UserCount].Username[15] = 0;
+		Users[UserCount].Username[14] = 0;
+
+		sprintf(temp, "sys, save %d - %d - %s", UserCount, Users[UserCount].Status, Users[UserCount].Username);
+
+		// Log(temp, "-system", 0);
+		CloseUser(UserCount);
+
+		UserCount++;
+		return;
+	}
+
+	if(ServerDown > -1000)
+	{
+		if(ServerDown <= 0)
+			ServerDown = ServerDown + 1;
+		else
+		{
+			if(!(ServerDown % 20))
+			{
+				INT32 LOCAL_50 = ServerDown % 20;
+				SendNotice(g_pMessageStringTable[(LOCAL_50 + 17) << 7]);
+			}
+
+			ServerDown = ServerDown + 1;
+			if(ServerDown == 120)
+				SetTimer(hWndMain, 0, 200, 0);
+		}
+	}
+
+	SecCounter = SecCounter + 1;
+	CurrentTime = timeGetTime();
+
+	if(Billing != 0 && BillCounter > 0 /* && Addr desconhecido 0x001D25FA0 */)
+	{
+		BillCounter = BillCounter - 1;
+
+		if(BillCounter <= 0)
+		{
+			CurrentTime = timeGetTime();
+
+			sprintf(temp, "err,start reconnect BIIL %d",  CurrentTime);
+
+			// Log(temp, "-system", 0);
+			int *LOCAL_51 = (int*)IP;
+			INT32 LOCAL_52 = ConnectBillServer(BillServerAddress, BillServerPort, *LOCAL_51, 1028); // MVO ECX,&BillServerSocket, 
+
+			CurrentTime = timeGetTime();
+
+			sprintf(temp, "err,start recoonect BILL %d", CurrentTime);
+
+			// Log(temp, "-system", 0);
+			if(LOCAL_52 == 0)
+			{
+				// Log("err,Reconnect BILL Server(x2) fail.", "-system", 0);
+				Billing = 0;
+			}
+			else
+			{
+				_AUTH_GAME LOCAL_101;
+				memset(&LOCAL_101, 0, 200);
+
+				SendBilling2(&LOCAL_101, 4);
+			}
+		}
+	}
+	else
+		BillCounter = 0;
+
+	if(!(SecCounter % 8))
+	{
+		for(INT32 LOCAL_102 = 0; LOCAL_102 < 100; LOCAL_102 ++)
+		{
+			if(SaveCount >= 100)
+				SaveCount = 1;
+
+			if(Users[SaveCount].Status == 22 && CMob[SaveCount].Mode != 0)
+			{
+				if(Billing == 2 && Users[SaveCount].Child == 1)
+				{
+					if(CMob[SaveCount].Status.Level >= SaveCount)
+					{
+						if(g_Hour <= 12 || g_Hour >= 19)
+						{
+							SendClientMessage(SaveCount, "Child_Pay.(F)");
+
+							SendCharList(SaveCount);
+							SaveCount ++;
+							break;
+						}
+					}
+				}
+
+				SaveUser(SaveCount, 0);
+
+				SaveCount ++;
+				break;
+			}
+			else
+				SaveCount = SaveCount + 1;
+		}
+	}
+
+	if(!(SecCounter % 2))
+	{
+		for(INT32 LOCAL_103 = 1; LOCAL_103 < 100;LOCAL_103 ++)
+		{
+			if(Users[LOCAL_103].Status != 22)
+				continue;
+
+			if(!CMob[LOCAL_103].Status.curHP)
+				continue;
+
+			Users[LOCAL_103].Potion.bQuaff = 0;
+
+			INT32 LOCAL_104 = ApplyHp(LOCAL_103);
+			INT32 LOCAL_105 = ApplyMp(LOCAL_103);
+
+			if(LOCAL_104 != 0)
+				SendScore(LOCAL_103);
+			else if(LOCAL_105 != 0)
+				SendSetHpMp(LOCAL_103);
+		}
+	}
+
+	// 00453741
+	ProcessDecayItem();
+
+	INT32 LOCAL_106 = 0;
+
+	INT32 LOCAL_107 = SecCounter % 4;
+	if(!LOCAL_107)
+		ProcessRanking();
+
+	INT32 LOCAL_108 = SecCounter % 16;
+	INT32 LOCAL_109 = SecCounter % 32;
+	
+	INT32 LOCAL_110 = 1;
+	for( ; LOCAL_110 < 100; LOCAL_110 ++)
+	{
+		if(LOCAL_110 == LOCAL_109 && Users[LOCAL_110].Status != 0 && Users[LOCAL_110].Status != 24)
+			CheckIdle(LOCAL_110);
+
+		if(LOCAL_110 == LOCAL_108 && CMob[LOCAL_110].Status.curHP > 0 && Users[LOCAL_110].Status == 22)
+		{
+			RegenMob(LOCAL_110);
+			ProcessAffect(LOCAL_110);
+
+			LOCAL_106 ++;
+		}
+
+		if(Users[LOCAL_110].Status == 0)
+			continue;
+
+		if(Users[LOCAL_110].Service.SizeOfSend == 0)
+			continue;
+
+		INT32 LOCAL_111 = SendMessageA(); // ECX
+
+		if(LOCAL_111 == 0)
+		{
+			sprintf(temp, "err,send fail close %d/%d %d/%d", LOCAL_110, Users[LOCAL_110].Service.FD, Users[LOCAL_110].Service.SizeOfSend, Users[LOCAL_110].Service.IndexOfSend);
+			
+			Users[LOCAL_110].Username[15] = 0;
+			Users[LOCAL_110].Username[14] = 0;
+
+			// Log
+			CloseUser(LOCAL_110);
+		}
+	}
+
+	if(BrState == 2 && LOCAL_110 == LOCAL_108 && BrItem > 0)
+	{
+		INT32 LOCAL_112 = BrMod;
+		if(LOCAL_112 >= 9)
+		{
+			SendDamage(2608, 1708, 2622, 1718);
+			SendDamage(2608, 1733, 2622, 1743);
+
+			SendEnvEffect(2608, 1708, 2622, 1718, 32, 0);
+			SendEnvEffect(2608, 1733, 2622, 1743, 32, 0);
+		}
+		else if(LOCAL_112 >= 7)
+		{
+			SendDamage(2608, 1708, 2622, 1711);
+			SendDamage(2608, 1739, 2622, 1743);
+
+			SendEnvEffect(2608, 1708, 2622, 1711, 32, 0);
+			SendEnvEffect(2608, 1739, 2622, 1743, 32, 0);
+		}
+	}
+
+	INT32 LOCAL_131 = SecCounter % 6;
+	LOCAL_110 = LOCAL_131 + 100;
+
+	for(LOCAL_110; ; LOCAL_110 += 6)
+	{
+		if(LOCAL_110 >= 30000 && LOCAL_110 >= 30000)
+			break;
+
+		INT32 LOCAL_114 = CMob[LOCAL_110].Mode;
+		INT32 LOCAL_115 = CMob[LOCAL_110].CapeInfo;
+
+		if(LOCAL_114 == 0)
+			continue;
+
+		if(LOCAL_114 == 3)
+		{
+			if(!CMob[LOCAL_110].Status.curHP)
+			{
+				//Log(err,standingby processer delete hp zero mob", "-system", 0);
+				DeleteMob(LOCAL_110, 1);
+				continue;
+			}
+
+			ProcessAffect(LOCAL_110);
+
+			pMobGrid[CMob[LOCAL_110].Target.Y][CMob[LOCAL_110].Target.Y] = LOCAL_110;
+		}
+
+		if(LOCAL_114 == 4)
+		{
+			if(!CMob[LOCAL_110].Status.curHP)
+			{
+				//Log(err,standingby processer delete hp zero mob", "-system", 0);
+				DeleteMob(LOCAL_110, 1);
+				continue;
+			}
+
+			ProcessAffect(LOCAL_110);
+
+			INT32 LOCAL_116 = CMob[LOCAL_110].Segment.Progress;
+			if(LOCAL_116 < 0 || LOCAL_116 > 5)
+				CMob[LOCAL_110].Segment.Progress = 0;
+
+			INT32 LOCAL_117 = StandingByProcessor(); // ECX
+
+			if(LOCAL_117 & 10000000)
+			{
+				INT32 LOCAL_118 = LOCAL_117 & 0x0FFFFFFF;
+				SetBattle(LOCAL_110, LOCAL_118);
+
+				UINT32 LOCAL_119 = CMob[LOCAL_110].Leader;
+
+				if(LOCAL_119 <= 0)
+					LOCAL_119 = LOCAL_110;
+
+				for(INT32 LOCAL_120 = 0; LOCAL_120 <= 12; LOCAL_120++)
+				{
+					INT32 LOCAL_121 = CMob[LOCAL_119].PartyList[LOCAL_120];
+					if(LOCAL_121 <= 100) // MAX_PLAYER
+						continue;
+
+					if(CMob[LOCAL_121].Mode == 0 || !CMob[LOCAL_121].Status.curHP)
+					{
+						if(CMob[LOCAL_121].Mode != 0)
+							DeleteMob(LOCAL_121, 1);
+
+						CMob[LOCAL_119].PartyList[LOCAL_120] = 0;
+					}
+					else
+						SetBattle(LOCAL_121, LOCAL_118);
+				}
+
+				if(LOCAL_118 < 100) // MAX_PLAYER
+				{
+					INT32 LOCAL_122 = CMob[LOCAL_118].Leader;
+					if(LOCAL_122 <= 0)
+						LOCAL_122 = LOCAL_118;
+
+					for(INT32 LOCAL_123 = 0 ; LOCAL_123 < 12; LOCAL_123++)
+					{
+						INT32 LOCAL_124 = CMob[LOCAL_122].PartyList[LOCAL_123];
+						if(LOCAL_124 <= 100) // MAX_PLAYER
+							continue;
+
+						if(CMob[LOCAL_124].Mode == 0 || !CMob[LOCAL_124].Status.curHP)
+						{
+							if(CMob[LOCAL_124].Mode != 0)
+								DeleteMob(LOCAL_124, 1);
+
+							CMob[LOCAL_122].PartyList[LOCAL_123] = 0;
+						}
+						else
+							SetBattle(LOCAL_124, LOCAL_110);
+					}
+
+				}
+				continue;
+			}
+			
+			if(LOCAL_117 & 1)
+			{
+				pCL_366h LOCAL_137;
+				
+				GetAction(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_137);
+				INT32 LOCAL_133 = BASE_GetSpeed((st_Status*)&CMob[LOCAL_110].Status);
+
+				INT32 LOCAL_132 = 0;
+
+				GridMulticast(LOCAL_110, CMob[LOCAL_110].Next.X , CMob[LOCAL_110].Next.Y, &LOCAL_137);
+
+				INT32 LOCAL_138 = CMob[LOCAL_110].Segment.Progress;
+				INT32 LOCAL_139 = CMob[LOCAL_110].GenerateID;
+
+				if(LOCAL_116 != LOCAL_138 && LOCAL_138 >= 0 && LOCAL_138 < 5 && LOCAL_139 >= 0 && LOCAL_139 < 4096 && mGener[LOCAL_139].SegmentAction[LOCAL_116][0])
+					SendSay(LOCAL_110, mGener[LOCAL_139].SegmentAction[LOCAL_116]);
+			}
+			if(LOCAL_117 & 16)
+			{
+				INT32 LOCAL_140 = CMob[LOCAL_110].Segment.Progress;
+				INT32 LOCAL_141 = CMob[LOCAL_110].GenerateID;
+
+				if(LOCAL_140 < 0 || LOCAL_140 >= 5)
+					continue;
+
+				if(LOCAL_140 >= 0 && LOCAL_140 < 5 && LOCAL_141 >= 0 && mGener[LOCAL_141].SegmentAction[LOCAL_140][0])
+					SendSay(LOCAL_110, mGener[LOCAL_141].SegmentAction[LOCAL_140]);
+			}
+			else if(LOCAL_117 & 256)
+				DeleteMob(LOCAL_110, 3);
+
+			else if(LOCAL_117 & 4096)
+			{   // 4541A6
+				// 
+				GetRandomPos();
+
+				if(CMob[LOCAL_110].Next.X == CMob[LOCAL_110].Target.X && CMob[LOCAL_110].Next.Y == CMob[LOCAL_110].Target.Y)
+					continue;
+
+				pCL_366h LOCAL_154;
+
+				GetAction(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_154);
+				LOCAL_154.mCommand[0] = 0; 
+
+				INT32 LOCAL_150  = BASE_GetSpeed((st_Status*)&CMob[LOCAL_110].Status);
+				GridMulticast(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_154);
+
+				if(LOCAL_117 & 2)
+					Teleportar(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y);
+			}
+		}
+	}
+
+	
+	INT32 LOCAL_113 = SecCounter % 4;
+	INT32 LOCAL_155 = SecCounter % 8;
+
+	if(LOCAL_113 == LOCAL_155)
+		LOCAL_155 = 1;
+	else
+		LOCAL_155 = 0;
+
+	LOCAL_110 = LOCAL_113 + 100;
+	for( ; ; LOCAL_110 += 4)
+	{
+		if(LOCAL_110 >= 30000 && LOCAL_110 >= 30000)
+			break;
+
+		// 00453bcb
+		if(CMob[LOCAL_110].Mode == 5)
+		{
+			INT32 LOCAL_156;
+			if(CMob[LOCAL_110].CapeInfo == 4)
+				LOCAL_156 = 0;
+
+			if(CMob[LOCAL_110].Status.curHP <= 0)
+			{
+				sprintf(temp, "err,battleprocessor delete hp 0 idx:%d, leader:%d fol0:%d fol1:%d", LOCAL_110, CMob[LOCAL_110].Leader, CMob[LOCAL_110].PartyList[0], CMob[LOCAL_110].PartyList[1]);
+				
+				//Log(temp, "-system", 0);
+				DeleteMob(LOCAL_110, 1);
+				continue;
+			}
+
+			if(LOCAL_155 != 0)
+				ProcessAffect(LOCAL_110);
+
+			INT32 LOCAL_157 = CMob[LOCAL_110].CurrentTarget;
+			if(LOCAL_157 > 0 && LOCAL_157 < 30000)
+			{
+				INT32 LOCAL_158 = CMob[LOCAL_110].Leader;
+				if(LOCAL_158 == 0)
+					LOCAL_158 = LOCAL_110;
+
+				INT32 LOCAL_159 = CMob[LOCAL_157].Leader;
+				if(LOCAL_159 == 0)
+					LOCAL_159 = LOCAL_157;
+
+				INT32 LOCAL_160 = CMob[LOCAL_110].GuildIndex;
+				if(CMob[LOCAL_110].GuildDisable != 0)
+					LOCAL_160 = 0;
+
+				INT32 LOCAL_161 = CMob[LOCAL_157].GuildIndex;
+				if(CMob[LOCAL_157].GuildDisable != 0)
+					LOCAL_161 = 0;
+
+				if(LOCAL_160 == 0 && LOCAL_161 == 0)
+					LOCAL_160 = -1;
+				
+				if(LOCAL_158 == LOCAL_159 || LOCAL_160 == LOCAL_161)
+					RemoveEnemyList(LOCAL_157);
+			}
+
+			INT32 LOCAL_162 = BattleProcessor(); // MOV ECX,
+			INT32 LOCAL_163 = Rand() % 100;
+
+			if(LOCAL_162 & 32)
+			{ // 0045460B
+				DeleteMob(LOCAL_110, 3);
+				continue;
+			}
+			else if(LOCAL_162 & 65536 && !(Rand() & 0x80000001))
+				SendEmotion(LOCAL_110, 14, 1);
+
+			if(LOCAL_162 & 4096)
+			{
+				UINT32 LOCAL_164 = CMob[LOCAL_110].CurrentTarget;
+
+				if(LOCAL_164 <= 0 || LOCAL_164 >= 30000)
+					continue;
+
+				p39D_613 LOCAL_175;
+				BASE_GetAttack(LOCAL_110, LOCAL_164, &LOCAL_175);
+
+				LOCAL_175.m_FlagLocal = 0;
+				
+				INT32 LOCAL_164 = LOCAL_175.m_Target.Index & 0xFFFF;
+
+				INT32 LOCAL_176 = LOCAL_175.m_SkillId;
+				if(LOCAL_176 >= 0 && LOCAL_176 < 96 && !(LOCAL_175.m_SkillParam & 0xFF))
+				{
+					if(LOCAL_176 == 33)
+						LOCAL_175.m_Motion = 0xFD;
+
+					INT32 LOCAL_177 = (((LOCAL_176 % 24) >> 3) + 1);
+					if(LOCAL_177 >= 1 && LOCAL_177 <= 3)
+					{
+						INT32 LOCAL_178 = CMob[LOCAL_110].Status.Mastery[LOCAL_177];
+						
+						INT32 LOCAL_179 = 0;
+						if(SetAffect(LOCAL_164, LOCAL_176, 100, LOCAL_178))
+							LOCAL_179 = 1;
+
+						if(SetTick(LOCAL_164, LOCAL_176, 100, LOCAL_178))
+							LOCAL_179 = 1;
+
+						if(LOCAL_179 != 0)
+							SendScore(LOCAL_164);
+					}
+				}
+
+				if(LOCAL_164 < 100 && LOCAL_175.m_Target.Damage > 0) // MAX_PLAYER
+				{
+					UINT32 LOCAL_180 = GetParryRate(&CMob[LOCAL_164], CMob[LOCAL_164].Parry);
+
+					INT32 LOCAL_181 = Rand() % 1000;
+					if(LOCAL_181 < LOCAL_180)
+					{
+						LOCAL_175.m_Target.Damage = 0xFFFD;
+						if(CMob[LOCAL_164].AffectInfo.Resist && LOCAL_181 < MAX_PLAYER)
+							LOCAL_175.m_Target.Damage = 0xFFFC;
+					}
+
+					if(CMob[LOCAL_110].CapeInfo == 4)
+						LOCAL_175.m_Target.Damage = (LOCAL_175.m_Target.Damage << 1) / 5;
+				}
+				UINT32 LOCAL_182 = CMob[LOCAL_164].Leader;
+				
+				if(LOCAL_175.m_Target.Damage > 0)
+				{
+					if(LOCAL_182 <= 0)
+						LOCAL_182 = LOCAL_164;
+
+					SetBattle(LOCAL_182, LOCAL_110);
+
+					if(CMob[LOCAL_110].CapeInfo != 4)
+						SetBattle(LOCAL_110 , LOCAL_182);
+
+					// 00454951
+
+					for(INT32 LOCAL_183 = 0; LOCAL_183 < 12; LOCAL_183 ++)
+					{
+						INT32 LOCAL_184 = CMob[LOCAL_182].PartyList[LOCAL_183];
+						if(LOCAL_184 <= MAX_PLAYER)
+							continue;
+						
+						if(CMob[LOCAL_184].Mode == 0 || CMob[LOCAL_184].Status.curHP <= 0)
+						{
+							if(CMob[LOCAL_184].Mode == 0)
+								DeleteMob(LOCAL_184, 1);
+
+							CMob[LOCAL_182].PartyList[LOCAL_183] = 0;
+							continue;
+						}
+						
+						SetBattle(LOCAL_184, LOCAL_110);
+						SetBattle(LOCAL_110, LOCAL_184);
+					}
+
+					// 00454A48
+					INT32 LOCAL_185 = CMob[LOCAL_110].Summoner;
+
+					if(CMob[LOCAL_110].CapeInfo == 4 && LOCAL_164 >= 100 && LOCAL_185 > 0 && LOCAL_185 < 100 && Users[LOCAL_185].Status == 22)
+					{
+						INT32 LOCAL_186 = CMob[LOCAL_185].Target.X;
+						INT32 LOCAL_187 = CMob[LOCAL_185].Target.Y;
+
+						INT32 LOCAL_188 = 46;
+
+						if(CMob[LOCAL_110].Target.X > (LOCAL_186 - LOCAL_188) && CMob[LOCAL_110].Target.X < (LOCAL_186 + LOCAL_188) && CMob[LOCAL_110].Target.Y > (LOCAL_187 - LOCAL_188)
+							&& CMob[LOCAL_110].Target.Y < (LOCAL_187 + LOCAL_188))
+						{	// 00454BCE
+							INT32 LOCAL_3AE;
+							if(CMob[LOCAL_164].Status.curHP < LOCAL_175.m_Target.Damage)
+								LOCAL_3AE = CMob[LOCAL_164].Status.curHP;
+							else
+								LOCAL_3AE = LOCAL_175.m_Target.Damage;
+
+							INT32 LOCAL_189 = LOCAL_3AE;
+							INT32 LOCAL_190 = CMob[LOCAL_164].Exp * LOCAL_189 / CMob[LOCAL_164].Status.maxHP;
+
+							if(CMob[LOCAL_185].Status.Level != CMob[LOCAL_110].Status.Level)
+							{
+								LOCAL_190 = GetExpApply(LOCAL_190, CMob[LOCAL_110].Status.Level, CMob[LOCAL_164].Status.Level);
+
+								if(CMob[LOCAL_164].CapeInfo == 4)
+									LOCAL_190 = 0;
+
+								CMob[LOCAL_185].Exp = CMob[LOCAL_185].Exp + LOCAL_190;
+							}
+						}
+					}
+				}
+
+				if(LOCAL_175.m_Target.Damage > 0 || LOCAL_175.m_Target.Damage  <= -5)
+				{
+					INT32 LOCAL_191 = LOCAL_175.m_Target.Damage;
+					INT32 LOCAL_192 = 0;
+
+					INT32 LOCAL_193 = CMob[LOCAL_164].Equip[14].Index;
+					
+					if(LOCAL_164 < 100 && LOCAL_193 >= 2360 && LOCAL_193 < 2390 && *(WORD*)&CMob[LOCAL_164].Equip[14].Effect[0].Index > 0)
+					{
+						LOCAL_191 = (LOCAL_175.m_Target.Damage * 3) >> 2;
+						LOCAL_192 = LOCAL_175.m_Target.Damage - LOCAL_191;
+
+						if(LOCAL_191 <= 0)
+							LOCAL_191 = 1;
+
+						LOCAL_175.m_Target.Damage = LOCAL_191;
+					}
+
+					if(CMob[LOCAL_164].Equip[13].Index == 786)
+					{
+						INT32 LOCAL_194 = BASE_GetItemSanc(&CMob[LOCAL_164].Equip[13]);
+
+						if(LOCAL_194 < 2)
+							LOCAL_194 = 2;
+
+						CMob[LOCAL_164].Status.curHP = CMob[LOCAL_164].Status.curHP - (LOCAL_175.m_Target.Damage / LOCAL_194);
+					}
+					else
+						CMob[LOCAL_164].Status.curHP = CMob[LOCAL_164].Status.curHP - LOCAL_175.m_Target.Damage;
+
+					if(LOCAL_164 > 100 && CMob[LOCAL_164].CapeInfo == 4)
+						LinkMountHp(LOCAL_164);
+
+					if(LOCAL_192 > 0)
+						ProcessAdultMount(LOCAL_164, LOCAL_192);
+				}
+
+				GridMulticast_2(CMob[LOCAL_164].Target.X, CMob[LOCAL_164].Target.Y, &LOCAL_175, 0); 
+
+				// 00454ED2
+
+				if(LOCAL_164 > 0 && LOCAL_164 < 100)
+				{
+					Users[LOCAL_164].Potion.CountHp = Users[LOCAL_164].Potion.CountHp - LOCAL_175.m_Target.Damage;
+					SetReqHp(LOCAL_164);
+				}
+
+				if(CMob[LOCAL_164].Status.curHP <= 0)
+					MobKilled(LOCAL_164, LOCAL_110, 0, 0);
+			}
+
+			if(LOCAL_162 & 256)
+			{
+				INT32 LOCAL_195 = CMob[LOCAL_110].CurrentTarget;
+
+				GetTargetPosDistance(LOCAL_195); // ECX
+				
+				if(CMob[LOCAL_110].Next.X == CMob[LOCAL_110].Target.X && CMob[LOCAL_110].Next.Y == CMob[LOCAL_110].Target.Y)
+					continue;
+
+				pCL_366h LOCAL_208;
+				GetAction(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_208);
+
+				LOCAL_208.mCommand[0] = 0;
+				
+				LOCAL_208.mSpeed = BASE_GetSpeed((st_Status*)&CMob[LOCAL_110].Status);
+
+				LOCAL_208.mType = 0;
+
+				GridMulticast(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_208);
+			}
+
+			if(LOCAL_162 & 1)
+			{
+				INT32 LOCAL_209 = CMob[LOCAL_110].CurrentTarget;
+
+				GetTargetPos(LOCAL_209); // ECX
+
+				if(CMob[LOCAL_110].Next.X == CMob[LOCAL_110].Target.X && CMob[LOCAL_110].Next.Y == CMob[LOCAL_110].Target.Y)
+					continue;
+
+				pCL_366h LOCAL_222;
+				GetAction(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_222);
+
+				LOCAL_222.mCommand[0] = 0;
+
+				LOCAL_222.mSpeed = BASE_GetSpeed((st_Status*)&CMob[LOCAL_110].Status);
+				LOCAL_222.mType = 0;
+
+				GridMulticast(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_222);
+			}
+
+			if(LOCAL_162 & 2)
+				Teleportar(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y);
+
+			if(LOCAL_162 & 16)
+			{
+				pCL_366h LOCAL_235;
+				GetAction(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_235);
+				
+				LOCAL_235.mSpeed = BASE_GetSpeed((st_Status*)&CMob[LOCAL_110].Status);
+				LOCAL_235.mType = 0;
+
+				GridMulticast(LOCAL_110, CMob[LOCAL_110].Next.X, CMob[LOCAL_110].Next.Y, &LOCAL_235);
+			}
+		}
+	}
+}

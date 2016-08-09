@@ -1,0 +1,27 @@
+void ClearAreaTeleport(int x1, int y1, int x2, int y2, int DestX, int DestY)
+{
+	//0x00401596
+
+	int LOCAL_1 = 0;
+
+	for(; LOCAL_1 < 100; LOCAL_1++)
+	{
+		if(CUsers[LOCAL_1].Status != 22)
+			continue;
+
+		if(!CMob[LOCAL_1].Mode)
+			continue;
+
+		if(CMob[LOCAL_1].TargetX >= x1 && CMob[LOCAL_1].TargetX <= x2 &&
+		   CMob[LOCAL_1].TargetY >= y1 && CMob[LOCAL_1].TargetY <= y2)
+		{
+			if(CMob[LOCAL_1].Status.curHP <= 0)
+			{
+				CMob[LOCAL_1].Status.curHP = 1;
+				SendScore(LOCAL_1);
+			}
+			
+			DoTeleport(LOCAL_1, DestX, DestY);
+		}
+	}
+}

@@ -1,0 +1,48 @@
+void SetBattle(int arg1, int arg2)
+{
+	//0x00401014 Lib: Server.obj Class : (null)
+
+    if(arg1 <= 0     || arg2 <= 0 ||
+	   arg1 >= 30000 || arg2 >= 30000)
+	   return;
+
+	if(!pMob[arg1].Mode)
+		return;
+
+	if(!pMob[arg2].Mode)
+		return;
+
+	if(arg1 < 100)
+	{
+		if(pUser[arg1].Status != 22)
+			return;
+	}
+
+	if(pMob[arg1].TargetX < (pMob[arg2].TargetX - 23))
+	    return;
+		
+	if(pMob[arg1].TargetX > (pMob[arg2].TargetX + 23))
+		return;
+
+	if(pMob[arg1].TargetY < (pMob[arg2].TargetY - 23))
+		return;
+
+	if(pMob[arg1].TargetY > (pMob[arg2].TargetY + 23))
+		return;
+
+	pMob[arg1].Mode = 5;
+	pMob[arg1].AddEnemyList(arg2);
+
+    int LOCAL_1 = pMob[arg1].GenerateIndex,
+		LOCAL_2 = Rand() & 0x80000003;
+
+	if(LOCAL_1 >= 0 && LOCAL_1 < 4096)
+	{
+		LOCAL_1 *= 0x0BAC;
+		LOCAL_2 *= 80;
+
+		if((*(BYTE*)(LOCAL_1 + LOCAL_2 + 0x00A16BA8)))
+			if(!pMob[arg1].Leader)
+			    SendChat(arg1, *(BYTE*)(LOCAL_1 + LOCAL_2 + 0x00A16BA8)); // CALL 004013CF
+	}
+}

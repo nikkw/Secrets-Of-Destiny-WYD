@@ -1,0 +1,10 @@
+
+void CloseUser(int clientId) // ECX
+{
+	CloseSocket(); // ecx  -> FALTA DESCOMPILAR
+
+	Users[clientId].Service.FD = 0;
+	*(DWORD*)Users[clientId].Unknown_64[400] = 0; // UNKNOW
+	Users[clientId].Status = 0;
+	Users[clientId].Username[0] = 0;
+}

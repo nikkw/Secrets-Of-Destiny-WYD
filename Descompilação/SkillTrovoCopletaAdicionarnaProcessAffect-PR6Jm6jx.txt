@@ -1,0 +1,485 @@
+//Bom to descompilando a ProcessAffect e como faz tempo q não posto nada ta ae, vcs q tem patch e quiserem testar ela façam um hook e adaptem para seus patchs. logo logo termino toda a func, vo descompilar a aura bestial agora.
+		else if(skillIndex == 22) //00450183
+		{
+			int alvo1 = MOB_EMPTY;
+			int alvo2 = MOB_EMPTY;
+			int alvo3 = MOB_EMPTY;
+			int alvo4 = MOB_EMPTY;
+			int alvo5 = MOB_EMPTY;
+			int alvo6 = MOB_EMPTY;
+
+			int getAtt = GetAttribute(pMob[conn].TargetX, pMob[conn].TargetY);
+			int capeInfo = pMob[conn].MOB.CapeInfo;
+			if((getAtt & 1) == 0)
+			{
+				int tY = pMob[conn].TargetY - 1;
+				int tX = pMob[conn].TargetX - 1;
+				int leader = pMob[conn].Leader;
+				if(leader <= 0)
+					leader = conn;
+
+				//0045027B
+				for(int i = tY; i <= tY + 2; i++)
+				{
+					//004502AD
+					if(i < 0 || i >= MAX_GRIDY)
+						continue;
+
+					//004502C4
+					for(int j = tX; j <= tX + 2; j++)
+					{
+						//004502F6
+						if(j < 0 || j >= MAX_GRIDX)
+							continue;
+
+						int MobGrid = pMobGrid[j][i];
+						//0045032C
+						if(MobGrid <= MOB_EMPTY || MobGrid > MAX_MOB)
+							continue;
+
+						if(pMob[MobGrid].Mode == MOB_EMPTY)
+							continue;
+
+						if(pMob[MobGrid].MOB.CurrentScore.Hp <= 0)
+							continue;
+
+						if(leader == pMob[MobGrid].Leader)
+							continue;
+
+						int MobCapeInfo = pMob[MobGrid].MOB.CapeInfo;
+						int flag = FALSE;
+						if(capeInfo == 7 && MobCapeInfo == 7 || capeInfo == 8 && MobCapeInfo == 8)
+							flag = TRUE;
+
+						if((pMob[MobGrid].MOB.Merchant & MSV_SNOOP) != 0)
+							continue;
+
+						//00450408
+						if(conn < MAX_PLAYER)
+						{
+							//00450412
+							if(pUser[conn].PKMode == 0)
+							{
+								if(MobGrid < MAX_PLAYER || MobCapeInfo == 4 || flag == TRUE)
+									continue;
+
+								//00450444
+								if((getAtt & 0x40) == 0)
+									if(MobGrid < MAX_PLAYER || MobCapeInfo == 4 || flag == TRUE)
+										continue;
+
+								//00450476
+								if((pMob[MobGrid].MOB.AffectInfo & RSV_HIDE) != 0)
+									continue;
+							}
+
+						}
+						//00450498
+						else
+						{
+							if(MobGrid >= MAX_PLAYER && MobCapeInfo != 4)
+								continue;
+						}
+
+						if(flag == TRUE && MobGrid >= MAX_PLAYER || MobCapeInfo == 6 && MobGrid == conn)
+							continue;
+
+						//004504E4
+						int oLeader = pMob[conn].Leader;
+						if(oLeader == MOB_EMPTY)
+							oLeader = conn;
+
+						int nLeader = pMob[MobGrid].Leader;
+						if(nLeader == MOB_EMPTY)
+							nLeader = MobGrid;
+
+						int gIndex = pMob[conn].MOB.GuildIndex;
+						if(pMob[conn].GuildDisable != FALSE)
+							gIndex = EMPTY_GUILD;
+
+						int mobGIndex = pMob[MobGrid].MOB.GuildIndex;
+						if(pMob[MobGrid].GuildDisable != FALSE)
+							mobGIndex = EMPTY_GUILD;
+
+						//004505A6
+						int gAlly = g_pGuildAlly[gIndex];
+						if(gAlly == EMPTY_GUILD)
+							gAlly = -2;
+
+						if(gIndex == EMPTY_GUILD && mobGIndex == EMPTY_GUILD)
+							gIndex = -1;
+
+						if(oLeader == nLeader || gIndex == mobGIndex || mobGIndex == gAlly)
+							continue;
+
+						if(alvo1 == MOB_EMPTY)
+						{
+							alvo1 = MobGrid;
+							continue;
+						}
+
+						if(alvo1 == MobGrid)
+							continue;
+
+						if(alvo2 == MOB_EMPTY)
+						{
+							alvo2 = MobGrid;
+							break;
+						}
+						if(alvo2 == MobGrid)
+							continue;
+						
+						if(alvo3 == MOB_EMPTY)
+						{
+							alvo3 = MobGrid;
+							break;
+						}
+						if(alvo3 == MobGrid)
+							continue;
+						
+						if(alvo4 == MOB_EMPTY)
+						{
+							alvo4 = MobGrid;
+							break;
+						}
+						if(alvo4 == MobGrid)
+							continue;
+						
+						if(alvo5 == MOB_EMPTY)
+						{
+							alvo5 = MobGrid;
+							break;
+						}
+						if(alvo5 == MobGrid)
+							continue;
+
+						if(alvo6 == MOB_EMPTY)
+						{
+							alvo6 = MobGrid;
+							break;
+						}
+					}
+					//0045071B
+					if(alvo6 != MOB_EMPTY)
+						break;
+				}
+				//0045072B
+				if(alvo3 == MOB_EMPTY || alvo4 == MOB_EMPTY || alvo5 == MOB_EMPTY || alvo6 == MOB_EMPTY)
+				{
+					//00450753
+					int otY = pMob[conn].TargetY - 2;
+					int otX = pMob[conn].TargetX - 2;
+					for(int k = otY; k <= otY + 4; k++)
+					{
+						//004507B5
+						if(k < 0 || k >= MAX_GRIDY)
+							continue;
+
+						for(int l = otX; l <= otX + 4; l++)
+						{
+							//004507FE
+							if(l < 0 || l >= MAX_GRIDX)
+								continue;
+
+							int OtherMobGrid = pMobGrid[otX][otY];
+							if(OtherMobGrid <= MOB_EMPTY || OtherMobGrid > MAX_MOB)
+								continue;
+
+							if(pMob[OtherMobGrid].Mode == MOB_EMPTY)
+								continue;
+
+							if(pMob[OtherMobGrid].MOB.CurrentScore.Hp <= 0)
+								continue;
+
+							if(leader == pMob[OtherMobGrid].Leader)
+								continue;
+
+							int OtherCapeInfo = pMob[OtherMobGrid].MOB.CapeInfo;
+							int OtherFlag = FALSE;
+							if(capeInfo == 7 && OtherCapeInfo == 7 || capeInfo == 8 && OtherCapeInfo == 8)
+								OtherFlag = TRUE;
+
+							//004508F1
+							if(OtherFlag == TRUE && OtherMobGrid >= MAX_PLAYER)
+								continue;
+
+							//00450908
+							if((pMob[OtherMobGrid].MOB.MagicIncrement & MSV_SNOOP) != 0)
+								continue;
+
+							//00450927
+							if(conn < MAX_PLAYER)
+							{
+								//00450931
+								if(pUser[conn].PKMode == 0 || OtherMobGrid < MAX_PLAYER || OtherCapeInfo == 4 || OtherFlag == TRUE)
+									continue;
+
+								if((getAtt & 0x40) == 0)
+									//00450976
+									if(OtherMobGrid < MAX_PLAYER || OtherCapeInfo == 4 || OtherFlag == TRUE)
+										continue;
+
+								//00450996
+								if((pMob[OtherMobGrid].MOB.AffectInfo & RSV_HIDE) != 0)
+									continue;
+							}
+							//004509B8
+							else
+							{
+								if(OtherMobGrid >= MAX_PLAYER && OtherCapeInfo != 4)
+									continue;
+							}
+
+							//004509CF
+							if(OtherMobGrid == conn)
+								continue;
+
+							if(OtherCapeInfo == 6)
+								continue;
+
+							//004509ED
+							int connLeader = pMob[conn].Leader;
+							if(connLeader == MOB_EMPTY)
+								connLeader = conn;
+
+							int otherLeader = pMob[OtherMobGrid].Leader;
+							if(otherLeader == MOB_EMPTY)
+								otherLeader = OtherMobGrid;
+
+							//00450A41
+							int connGIndex = pMob[conn].MOB.GuildIndex;
+							if(pMob[conn].GuildDisable != 0)
+								connGIndex = 0;
+
+							int otherGIndex = pMob[OtherMobGrid].MOB.GuildIndex;
+							if(pMob[OtherMobGrid].GuildDisable != 0)
+								otherGIndex = 0;
+
+							int connGuildAlly = g_pGuildAlly[connGIndex];
+							if(connGuildAlly == 0)
+								connGuildAlly = -2;
+
+							if(connGIndex == 0 && otherGIndex == 0)
+								connGuildAlly = -1;
+
+							//00450AF4
+							if(connLeader == otherLeader || connGIndex == otherGIndex || connGuildAlly == otherGIndex)
+								continue;
+
+							//00450B2D
+							if(alvo1 == MOB_EMPTY)
+							{
+								alvo1 = OtherMobGrid;
+								continue;
+							}
+							if(alvo1 == OtherMobGrid)
+								continue;
+							
+							if(alvo2 == MOB_EMPTY)
+							{
+								alvo2 = OtherMobGrid;
+								break;
+							}
+							if(alvo2 == OtherMobGrid)
+								continue;
+						
+							if(alvo3 == MOB_EMPTY)
+							{
+								alvo3 = OtherMobGrid;
+								break;
+							}
+							if(alvo3 == OtherMobGrid)
+								continue;
+						
+							if(alvo4 == MOB_EMPTY)
+							{
+								alvo4 = OtherMobGrid;
+								break;
+							}
+							if(alvo4 == OtherMobGrid)
+								continue;
+						
+							if(alvo5 == MOB_EMPTY)
+							{
+								alvo5 = OtherMobGrid;
+								break;
+							}
+							if(alvo5 == OtherMobGrid)
+								continue;
+
+							if(alvo6 == MOB_EMPTY)
+							{
+								alvo6 = OtherMobGrid;
+								break;
+							}
+						}
+						//00450C24
+						if(alvo6 != MOB_EMPTY)
+							break;
+					}
+				}
+				//00450C34
+				if(alvo1 != MOB_EMPTY)
+				{
+					//00450C41
+					MSG_Attack pAttack;
+					memset(&pAttack, 0x0, sizeof MSG_Attack);
+
+					//00450C54
+					pAttack.Header.PacketId = _MSG_Attack;
+					pAttack.Header.ClientId = conn;
+					pAttack.Header.Size = sizeof MSG_Attack;
+					pAttack.Header.TimeStamp = 0x0E0A1ACA;
+
+					//00450C7B
+					pAttack.PosX = pMob[conn].TargetX;
+					pAttack.PosY = pMob[conn].TargetY;
+
+					pAttack.Motion = -2; //redução de movimento do alvo
+					if(pMob[conn].MOB.Equip[FACE].Index == 219) //torre de thor
+						pAttack.Motion = -4; //redução de movimento do alvo
+
+					pAttack.AttackerID = conn;
+					pAttack.SkillIndex = 33; //Trovão
+					
+					//00450CE3
+					int calcRand = rand() % 100;
+					int SelectEnemy = skillValue + lvl + calcRand;
+
+					//Seleciona os alvos
+					pAttack.Dam[0].TargetID = alvo1;
+					pAttack.Dam[0].Damage = -1;
+
+					if(SelectEnemy > 300)
+					{
+						pAttack.Dam[1].TargetID = alvo2;
+						pAttack.Dam[1].Damage = -1;
+					}
+
+					if(SelectEnemy > 350)
+					{
+						pAttack.Dam[2].TargetID = alvo3;
+						pAttack.Dam[2].Damage = -1;
+					}
+
+					if(SelectEnemy > 400)
+					{
+						pAttack.Dam[3].TargetID = alvo4;
+						pAttack.Dam[3].Damage = -1;
+					}
+
+					if(SelectEnemy > 450)
+					{
+						pAttack.Dam[4].TargetID = alvo5;
+						pAttack.Dam[4].Damage = -1;
+					}
+
+					if(SelectEnemy > 500)
+					{
+						pAttack.Dam[5].TargetID = alvo6;
+						pAttack.Dam[5].Damage = -1;
+					}
+
+					//00450DD4
+					if(conn < MAX_PLAYER)
+						ProcessClientMessage(conn, (char*)&pAttack);
+					else
+					{
+						//00450DF2
+						for(int m = 0; m < MAX_TARGET; m++)
+						{
+							int enemy = pAttack.Dam[i].TargetID;
+							int baseAttack = pMob[conn].MOB.BaseScore.Attack;
+							baseAttack = ((((rand() % 8 + 5) * baseAttack) / 10) - (pMob[conn].MOB.CurrentScore.Defense >> 1));
+							if(baseAttack < 0)
+								baseAttack = rand() % 100;
+
+							//00450EB0
+							pAttack.Dam[i].Damage = baseAttack;
+							if(enemy <= MOB_EMPTY || enemy >= MAX_MONSTER)
+								continue;
+
+							int enemyLeader = pMob[enemy].Leader;
+							if(pAttack.Dam[i].Damage > 0)
+							{
+								if(enemyLeader <= MOB_EMPTY)
+									enemyLeader = enemy;
+
+								SetBattle(enemyLeader, i);
+								SetBattle(i, enemyLeader);
+								for(int n = 0; n < MAX_PARTY; n++)
+								{
+									int partyMobID = pMob[enemyLeader].PartyList[n];
+									if(partyMobID <= MAX_PLAYER)
+										continue;
+
+									if(pMob[partyMobID].Mode == USER_EMPTY || pMob[partyMobID].MOB.CurrentScore.Hp <= 0)
+									{
+										if(pMob[partyMobID].Mode != USER_EMPTY)
+											DeleteMob(partyMobID, TRUE);
+
+										pMob[enemyLeader].PartyList[n] = MOB_EMPTY;
+										continue;
+									}
+									else
+									{
+										SetBattle(partyMobID, i);
+										SetBattle(i, partyMobID);
+									}
+								}
+							}
+							//00451039
+							if(pAttack.Dam[0].Damage > 0 || pAttack.Dam[0].Damage <= -5)
+							{
+								int Attack = pAttack.Dam[0].Damage;
+								int calcAttack = 0;
+								int mountID = pMob[enemy].MOB.Equip[MOUNT].Index;
+								if(enemy < MAX_PLAYER && mountID >= 2360 && mountID < 2390 && pMob[enemy].MOB.Equip[MOUNT].EF1 > 0)
+								{
+									Attack = ((pAttack.Dam[0].Damage * 3) >> 2);
+									calcAttack = pAttack.Dam[0].Damage - Attack;
+									if(Attack <= 0)
+										Attack = 1;
+
+									pAttack.Dam[0].Damage = Attack;
+								}
+								//00451109
+								if(pMob[enemy].MOB.Equip[PET].Index == 786)
+								{
+									//00451124
+									int itemsanc = BASE_GetItemSanc(&pMob[enemy].MOB.Equip[PET]);
+									if(itemsanc < 2)
+										itemsanc = 2;
+
+									pMob[enemy].MOB.CurrentScore.Hp = (pMob[enemy].MOB.CurrentScore.Hp - (pAttack.Dam[0].Damage / itemsanc));
+								}
+								else
+								{
+									//0045118F
+									pMob[enemy].MOB.CurrentScore.Hp = (pMob[enemy].MOB.CurrentScore.Hp - pAttack.Dam[0].Damage);
+								}
+								//004511BE
+								if(enemy > MAX_PLAYER && pMob[enemy].MOB.CapeInfo == 4)
+									LinkMountHp(enemy);
+								if(calcAttack > 0)
+									ProcessAdultMount(enemy, calcAttack);
+							}
+							//0045120D
+							if(enemy > MOB_EMPTY || enemy < MAX_PLAYER)
+							{
+								pUser[enemy].CountHp = pUser[enemy].CountHp - pAttack.Dam[0].Damage;
+								SetReqHp(enemy);
+							}
+							//0045125B
+							if(pMob[enemy].MOB.CurrentScore.Hp <= 0)
+							{
+								pMob[enemy].MOB.CurrentScore.Hp = 0;
+								MobKilled(enemy, conn, 0, 0);
+							}
+						}
+						//004512A3
+						GridMulticast(pMob[conn].TargetX, pMob[conn].TargetY, (MSG_STANDARD*)&pAttack, 0);
+					}
+				}
+			}
+		}

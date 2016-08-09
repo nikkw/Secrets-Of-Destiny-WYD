@@ -1,0 +1,18 @@
+esse é um projeto base, nao deu tempo de adicinar tuo q tenho, mas adicionei boa parte das structs, funções, e iniciei a configuração do projeto.
+
+ainda nao ta compilavel, pos ta dando uns unresolver na hora de compilar e nao vai da tempo deu ajeitar agora, se kiserem ajeitar fiquem avontade.
+
+essa e a base e vamos q vamos, analisem bem e estudem ela.
+
+
+http://www.sendspace.com/file/1vmrlk
+
+Anotações (shepher):
+
+Já fiz ficar compilável.
+
+BASE_InitializeItemLIst -> Não postado ou não feito, então comentado no código para retirar erro de unresolved external
+BASE_InitializeEffectName -> Não postado ou não feito, então comentado no código para retirar erro de unresolved external
+BASE_InitializeInitItem -> Não postado ou não feito, então comentado no código para retirar erro de unresolved external
+BASE_InitializeGuildName -> Não postado ou não feito, então comentado no código para retirar erro de unresolved external
+BASE_InitializeServerList -> Não postado ou não feito, então comentado no código para retirar erro de unresolved external

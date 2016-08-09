@@ -1,0 +1,15 @@
+
+int CloseSocket(int clientId) // CPSock::
+{
+	Users[clientId].Service.SizeOfSend = 0;
+	Users[clientId].Service.IndexOfSend = 0;
+	Users[clientId].Service.SizeOfRecv = 0;
+	Users[clientId].Service.IndexOfRecv = 0;
+	Users[clientId].Service.Hello = 0;
+
+	if(Users[clientId].Service.FD)
+		closesocket(Users[clientId].Service.FD);
+
+	Users[clientId].Service.FD = 0;
+	return 1;
+}

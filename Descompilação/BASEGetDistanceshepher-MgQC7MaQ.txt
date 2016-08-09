@@ -1,0 +1,22 @@
+
+int BASE_GetDistance(int x1,int y1,int x2,int y2)
+{
+	int local1, local2;
+	if(x1 > x2)
+		local1 = x1 - x2;
+	else
+		local1 = x2 - x1;
+
+	if(y1 > y2)
+		local2 = y1 - y2;
+	else
+		local2 = y2 - y1;
+
+	if(local1 <= 7 && local1 <= 7)
+		return *(DWORD*)(local2 * 28 + local1 * 4 + 0x4C80B8); // array com distâncias 
+
+	if(local1 > local2)
+		return local1 + 1;
+
+	return local2 + 1;
+}

@@ -1,0 +1,15 @@
+int BASE_GetItemAmount(STRUCT_ITEM* item) //00405150 - ok
+{
+	int Amount = 0;
+	if(item->EF1 == EF_AMOUNT || item->EF2 == EF_AMOUNT || item->EF3 == EF_AMOUNT)
+	{
+		if(item->EF1 == EF_AMOUNT)
+			Amount = item->EFV1;
+		else if(item->EF2 == EF_AMOUNT)
+			Amount = item->EFV2;
+		else
+			Amount = item->EFV3;
+	}
+
+	return Amount;
+}

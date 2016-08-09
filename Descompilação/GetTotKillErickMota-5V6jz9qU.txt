@@ -1,0 +1,20 @@
+int GetTotKill(int Cid)
+{
+	// 0x0040130C
+	
+	if(Cid <= 0 || Cid >= 100)
+		return;
+
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	int LOCAL_1 = player->Inventory[63].EFV2,
+		LOCAL_2 = player->Inventory[63].EFV3;
+
+	LOCAL_1 &= 0xFF;
+	LOCAL_2 &= 0xFF;
+
+	LOCAL_2 <<= 8; // Só no LOCAL_2 ? Não deveria ser nos dois ?
+
+	int LOCAL_3 = LOCAL_1 + LOCAL_2;
+	return LOCAL_3;
+}

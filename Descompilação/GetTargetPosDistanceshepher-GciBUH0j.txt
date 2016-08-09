@@ -1,0 +1,65 @@
+void GetTargetPosDistance(int arg1) // arg1
+{
+	static int pHeightGrid[4096][4096]; // 1.7 - 7B7E678;
+	static int pMobGrid[4096][4096]; // 1.7 - 7B7E678;
+	// VEM DE ECX
+	st_Mob *mob = &CMob[1]; // ecx
+
+	if(mob->bStatus.Move.Speed) // & F
+	{
+		mob->Next.X = mob->Target.X;
+		mob->Next.Y = mob->Target.Y;
+
+		return;
+	}
+
+	int LOCAL_2 = BASE_GetSpeed((st_Status*)&mob->Status);
+	int LOCAL_3 = LOCAL_2 << 2 << 1 >> 2;
+
+	if(LOCAL_3 >= 24)
+		LOCAL_3 = 23;
+	
+	mob->Last.X = mob->Target.X;
+	mob->Last.Y = mob->Target.Y;
+
+	mob->Next.X = mob->Last.X;
+	mob->Next.Y = mob->Last.Y;
+
+	if(CMob[arg1].Target.X > mob->Last.X)
+		mob->Next.X = mob->Next.X - (Rand() & 0x80000001) + 1;
+	else if(CMob[arg1].Target.X < mob->Last.X)
+		mob->Next.X = mob->Next.X + (Rand() & 0x80000001) + 1;
+
+	if(CMob[arg1].Target.Y > mob->Last.Y)
+		mob->Next.Y = mob->Next.Y - (Rand() & 0x80000001) + 1;
+	else if(CMob[arg1].Target.X < mob->Last.X)
+		mob->Next.Y = mob->Next.Y + (Rand() & 0x80000001) + 1;
+
+	GetEmptyMobGrid(0, (int*)&mob->Next.X, (int*)&mob->Next.Y);
+
+	INT32 LOCAL_4;
+	for(LOCAL_4 = LOCAL_3; LOCAL_4 >= 0; LOCAL_4 --)
+	{
+		BASE_GetRoute(mob->Last.X, mob->Last.Y, (int*)&mob->Next.X, (int*)&mob->Next.Y, (char*)mob->Route, LOCAL_4, (char*)pHeightGrid);
+
+		if(pMobGrid[mob->Next.Y][mob->Next.X] == 0)
+			break;
+
+		if(LOCAL_4 != LOCAL_3)
+		{
+			GetEmptyMobGrid(0, (int*)&mob->Next.X, (int*)&mob->Next.Y);
+
+			BASE_GetRoute(mob->Last.X, mob->Last.Y, (int*)&mob->Next.X, (int*)&mob->Next.Y, (char*)mob->Route, LOCAL_4, (char*)pHeightGrid);
+			if(pMobGrid[mob->Next.Y][mob->Next.X] == 0)
+				break;
+		}
+	}
+
+	if(LOCAL_4 == -1 || !mob->Route[0])
+	{
+		mob->Next.X = mob->Target.X;
+		mob->Next.Y = mob->Target.Y;
+
+		mob->Route[0] = 0;
+	}
+}

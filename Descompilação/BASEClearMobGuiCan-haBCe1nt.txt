@@ -1,0 +1,21 @@
+void BASE_ClearMob(STRUCT_MOB* mob) //00406910 - ok
+{
+	memset(&mob, 0, sizeof(STRUCT_MOB));
+	mob->LastPosition.x = 2112;
+	mob->LastPosition.y = 2112;
+
+	memset(&mob->BaseScore, 0, sizeof(STRUCT_SCORE));
+	memset(&mob->CurrentScore, 0, sizeof(STRUCT_SCORE));
+
+	int i;
+	for(i = 0; i < MAX_EQUIP; i++)
+		BASE_ClearItem(&mob->Equip[i]);
+
+	for(i = 0; i < MAX_INVEN; i++)
+		BASE_ClearItem(&mob->Inventory[i]);
+
+	mob->SkillBar[0] = 0xFF;
+	mob->SkillBar[1] = 0xFF;
+	mob->SkillBar[2] = 0xFF;
+	mob->SkillBar[3] = 0xFF;
+}

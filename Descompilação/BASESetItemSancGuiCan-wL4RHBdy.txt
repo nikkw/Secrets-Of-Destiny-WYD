@@ -1,0 +1,22 @@
+int BASE_SetItemSanc(STRUCT_ITEM* item, int sanc, int success) //00405070 - ok - atualizada(reconhecendo tinturas)
+{
+	if(sanc < 0 || sanc > 15)
+		sanc = 0;
+
+	if(success < 0) // TODO refazer o calculo para reconhecer itens +10 +
+		success = 0;
+	if(success > 20)
+		success = 20;
+
+	int getRef = (success * 10) + sanc;
+	if(item->EF1 == 43 || (item->EF1 >= 116 && item->EF1 <= 125))
+		item->EFV1 = getRef;
+	else if(item->EF2 == 43 || (item->EF1 >= 116 && item->EF1 <= 125))
+		item->EFV2 = getRef;
+	else if(item->EF3 == 43 || (item->EF1 >= 116 && item->EF1 <= 125))
+		item->EFV3 = getRef;
+	else
+		return FALSE;
+
+	return TRUE;
+}

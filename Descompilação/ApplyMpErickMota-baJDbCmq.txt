@@ -1,0 +1,26 @@
+int ApplyMp(int Cid)
+{
+	// 0x0040153C
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	if(Users[Cid].Potion.CountMP > player->Status.maxHP)
+		Users[Cid].Potion.CountMP = player->Status.maxHP;
+
+	int LOCAL_1 = player->Status.curMP,
+		LOCAL_2 = Users[Cid].Potion.CountMP;
+
+	if(LOCAL_2 <= LOCAL_1)
+	{
+		// eax = player->Status.Level
+		int LOCAL_3 = player->Status.Level + 50;
+		
+		player->Status.curMP += LOCAL_3;
+		
+		if(player->Status.curMP > LOCAL_2)
+			player->Status.curMP = LOCAL_2;
+		
+		return 1;
+	}
+	
+	return -1;
+}

@@ -1,0 +1,49 @@
+void BASE_WriteItemList(int nItemList) //00406250 - ok
+{
+	int size = sizeof(STRUCT_ITEMLIST) * MAX_ITEMLIST;
+	char *temp = (char*)g_pItemList;
+
+	int i;
+	for(i = 0; i < size; i++)
+		temp[i]= temp[i] ^ 0x5A;
+
+	FILE* fp = NULL;
+	if(nItemList == 0)
+	{
+		fp = fopen(".\\ItemList.bin", "wb");
+		if(fp == NULL)
+		{
+			MessageBox(NULL, "ItemList.bin", "ERROR", NULL);
+			return;
+		}
+
+		fwrite(g_pItemList, sizeof(STRUCT_ITEMLIST) * MAX_ITEMLIST, 1, fp);
+	}
+
+	int sum = BASE_GetSum2((char*)g_pItemList, size);
+	int nRand = rand();
+	if(nItemList == 0)
+	{
+		fwrite(&nRand, sizeof(nRand), 1 , fp);
+		fclose(fp);
+	}
+
+	FILE* fpCSum = NULL;
+	if(nItemList == 0)
+		fpCSum = fopen("..\\ItemCSum.h", "wt");
+	else
+		fpCSum = fopen("..\\ItemCSum.h", "a+");
+
+	if(fpCSum != NULL)
+	{
+		if(nItemList == 0)
+			fprintf(fpCSum, "#define ITEM_CHECKSUM %d\n", sum);
+		else
+			fprintf(fpCSum, "#define ITEM_CHECKSUM2 %d\n", sum);
+
+		fclose(fpCSum);
+	}
+
+	for(i = 0; i < size; i++)
+		temp[i]= temp[i] ^ 0x5A;
+}

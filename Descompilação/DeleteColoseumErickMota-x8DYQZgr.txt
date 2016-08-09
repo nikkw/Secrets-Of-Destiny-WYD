@@ -1,0 +1,20 @@
+void DeleteColoseum()
+{
+	// 0x0040121C
+	for(int LOCAL_1 = 100; LOCAL_1 < 30000; LOCAL_1++)
+	{
+		if(!cMob[LOCAL_1].Mode)
+			continue;
+
+		if(!cMob[LOCAL_1].Status.curHP)
+			continue;
+
+		if(!cMob[LOCAL_1].GenerateIndex || cMob[LOCAL_1].GenerateIndex == 1 || cMob[LOCAL_1].GenerateIndex == 2)
+			DeleteMob(LOCAL_1, 2);
+
+		if(cMob[LOCAL_1].GenerateIndex != 5 && cMob[LOCAL_1].GenerateIndex != 6 && cMob[LOCAL_1].GenerateIndex != 7)
+			continue;
+
+		DeleteMob(LOCAL_1, 2);
+	}
+}

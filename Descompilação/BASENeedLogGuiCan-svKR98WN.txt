@@ -1,0 +1,50 @@
+int BASE_NeedLog(STRUCT_ITEM* item, int money) //00401c40 - ok
+{
+	int ItemID = item->Index;
+	if(ItemID <= 0 || ItemID > MAX_ITEMLIST)
+		return FALSE;
+
+	if(money >= 1000000)
+		return TRUE;
+
+	int ItemSanc = BASE_GetItemSanc(item);
+	if(ItemSanc >= 3)
+		return TRUE;
+
+	int ItemPos = g_pItemList[ItemID].Pos;
+	int BonusMagic = BASE_GetBonusItemAbility(item, EF_MAGIC);
+	int BonusDamage = BASE_GetBonusItemAbility(item, EF_DAMAGE);
+	int GuildID = BASE_GetGuild(item);
+	if(ItemPos == WEAPON_POS || ItemPos == WEAPON2HAND_POS)
+	{
+		if(BonusMagic >= 12)
+			return TRUE;
+		
+		if(BonusDamage >= 27)
+			return TRUE;
+	}
+	else
+	{
+		if(BonusMagic >= 8)
+			return TRUE;
+
+		if(BonusDamage >= 12)
+			return TRUE;
+	}
+
+	if(GuildID > 0 || ItemID == 419 || ItemID == 420 || ItemID == 412 || ItemID == 413 || ItemID == 753 || ItemID == 657 || ItemID == 470 || ItemID == 500 || ItemID == 522)
+		return TRUE;
+
+	if(ItemID >= 551 && ItemID <= 562)
+		if(item->EF1 != 0)
+			if(item->EF1 != EF_UNIQUE)
+				if(item->EF2 != 0)
+					if(item->EF2 != EF_UNIQUE)
+						return TRUE;
+
+	int ItemPrice = g_pItemList[ItemID].Price;
+	if(ItemPrice >= 1000000)
+		return TRUE;
+
+	return FALSE;
+}

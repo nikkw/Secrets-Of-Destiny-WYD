@@ -1,0 +1,15 @@
+void BASE_UnderBarToSpace(char* szStr) //00406870 - ok
+{ 	
+	int nStrLen = (int)strlen(szStr);
+	unsigned char* pStr = (unsigned char*)szStr;
+	unsigned char* pNext = _mbschr(pStr, '_');
+	while(pNext)
+	{
+		*pNext = ' ';
+		pNext = _mbschr(pNext, '_');
+		nStrLen--;
+
+		if(nStrLen < 0)
+			break;
+	}
+}

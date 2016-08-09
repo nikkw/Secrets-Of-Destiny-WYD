@@ -1,0 +1,72 @@
+int BASE_GetBonusItemAbility(STRUCT_ITEM* item, unsigned char Type) //00404730 - ok
+{
+	if(item->Index >= 2330 && item->Index < 2390)
+		return FALSE;
+
+	int ret = FALSE;
+	int itemId = item->Index;
+	if(itemId <= 0 && itemId > MAX_ITEMLIST)
+		return ret;
+
+	int itemPos = g_pItemList[itemId].Pos;
+	for(int i = 0; i < 3; i++)
+    {
+		if(item->Effect[i].Index != Type)
+			continue;
+
+		int EffValue = item->Effect[i].Value;
+		if(Type == EF_CLASS && EffValue == 1)
+			EffValue = 10;
+
+		ret = ret + EffValue;
+		break;
+	}
+
+	if(Type == EF_RESIST1 || Type == EF_RESIST2 || Type == EF_RESIST3 || Type == EF_RESIST4)
+    {
+		int i;
+        for(i = 0; i < 12; i++)
+        {
+            if(g_pItemList[itemId].Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + g_pItemList[itemId].Effect[i].Value;
+            break;
+        }
+
+        for(i = 0; i < 3; i++)
+        {
+            if(item->Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + item->Effect[i].Value;
+            break;
+        }
+    }
+
+	int itemSanc = BASE_GetItemSanc(item);
+	if(item->Index <= 40)
+        itemSanc = 0;
+
+	if(itemSanc >= 9 && (itemPos & 0xF00) != 0)
+        itemSanc++;
+
+	if(itemSanc != 0 && Type != EF_GRID && Type != EF_CLASS && Type != EF_POS && Type != EF_WTYPE && Type != EF_RANGE &&
+       Type != EF_LEVEL && Type != EF_REQ_STR && Type != EF_REQ_INT && Type != EF_REQ_DEX && Type != EF_REQ_CON && 
+	   Type != EF_VOLATILE && Type != EF_INCUBATE && Type != EF_INCUDELAY)
+    {
+        if(itemSanc <= 10)
+            ret = (((itemSanc + 10) * ret) / 10);
+        else
+        {
+            static int Power[] = {
+                220, 250, 280, 320, 370
+            };
+
+            int val = Power[itemSanc - 11];
+            ret = ((((ret * 10) * val) / 100) / 10);
+        }
+    }
+
+	return ret;
+}

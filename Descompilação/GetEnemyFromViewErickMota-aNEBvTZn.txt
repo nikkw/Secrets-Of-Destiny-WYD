@@ -1,0 +1,84 @@
+int GetEnemyFromView()
+{
+	//0x0040151E
+
+	//POP ECX
+        //MOV [LOCAL.1],ECX
+        // MOB vem de ecx
+	
+	int LOCAL_2 = 0x9, //MOV [LOCAL.2],9
+		LOCAL_3 = 0x9, //MOV [LOCAL.3],9
+		LOCAL_4 = LOCAL_1->TargetX,
+		LOCAL_5 = LOCAL_1->TargetY;
+
+	if(MOB.CapeInfo != 7)
+	{
+	    if(MOB.CapeInfo == 8)
+		{
+			LOCAL_3 = 0x13;
+			LOCAL_2 = 0x13;
+
+			LOCAL_4 -= MOB.TargetX - 6;
+			LOCAL_5 -= MOB.TargetY - 6;
+		}
+	}
+
+	int LOCAL_6 = LOCAL_4,
+		LOCAL_7 = LOCAL_5,
+		LOCAL_8 = LOCAL_4 + LOCAL_3,
+		LOCAL_9 = LOCAL_5 + LOCAL_2,
+		LOCAL_10 = LOCAL_7;
+
+	for(; LOCAL_10 < LOCAL_9; LOCAL_10++)
+	{
+		int LOCAL_11 = LOCAL_6;
+
+		for(; LOCAL_11 < LOCAL_8; LOCAL_11++)
+		{
+			if(LOCAL_11 == MOB.TargetX ||
+			   LOCAL_10 == MOB.TargetY)
+			{
+				if(LOCAL_11 < 0 || LOCAL_10 < 0 ||
+				   LOCAL_11 > 1000 || LOCAL_10 > 1000)
+				   continue;
+
+				int LOCAL_12 = ((LOCAL_10 << 0x0D) + LOCAL_11 * 2 + 0x003B07D14); // Buffer ?
+
+				if(!LOCAL_12)
+					continue;
+
+				st_Mob *tmpPlayer = GetMobFromIndex(LOCAL_12);
+
+				if(tmpPlayer->Status.curHP < 0)
+					continue;
+				if(!tmpPlayer->Mode)
+					continue;
+
+				if(LOCAL_12 < 100)
+				{
+					if(tmpPlayer->AffectInfo.Value < 0)
+						continue;
+				}
+
+				int LOCAL_13 = tmpPlayer->CapeInfo;
+
+				if(MOB.CapeInfo >= 0)
+				{
+					if(MOB.CapeInfo < 9 &&
+					   LOCAL_13 >= 0 && LOCAL_13 >= 9)
+					{
+						Log("err, clan out or range", LOCAL_1, 0);
+						return -1;
+					}
+					
+					MOB.CapeInfo *= 24;
+
+					if((MOB.CapeInfo + LOCAL_13 * 4 + 0x004C8F74) <= 0)
+						return LOCAL_12;
+				}
+			}
+		}
+	}
+
+	return -1;
+}

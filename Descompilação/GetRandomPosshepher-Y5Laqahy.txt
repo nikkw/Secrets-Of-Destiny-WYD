@@ -1,0 +1,56 @@
+void GetRandomPos(int clientId) // VEM DE ECX, na verdade
+{
+	static short pHeightGrid[1024][1024];
+	static short pMobGrid[4096][4096];
+
+	st_Mob *LOCAL_1 = GetMobFromIndex(clientId);
+
+	if(!LOCAL_1->bStatus.Move.Speed)
+	{
+		LOCAL_1->Next.X = LOCAL_1->Target.X;
+		LOCAL_1->Next.Y = LOCAL_1->Target.Y;
+
+		return;
+	}
+
+	INT32 LOCAL_2 = BASE_GetSpeed((st_Status*)&LOCAL_1->Status);
+	INT32 LOCAL_3 = ((LOCAL_2 << 2) << 1) >> 2;
+
+	if(LOCAL_3 >= 24)
+		LOCAL_3 = 23;
+
+	LOCAL_1->Last.X = LOCAL_1->Target.X;
+	LOCAL_1->Last.Y = LOCAL_1->Target.Y;
+	
+	LOCAL_1->Next.X = LOCAL_1->Last.X + ((Rand() % 7) - 3);
+	LOCAL_1->Next.Y = LOCAL_1->Last.Y + ((Rand() % 7) - 3);
+
+	GetEmptyMobGrid(0, (int*)&LOCAL_1->Next.X, (int*)&LOCAL_1->Next.Y);
+
+	INT32 LOCAL_4;
+	for(LOCAL_4 = LOCAL_3; LOCAL_3 >= 0; LOCAL_3--)
+	{
+		BASE_GetRoute(LOCAL_1->Last.X, LOCAL_1->Last.Y, (int*)&LOCAL_1->Next.X, (int*)&LOCAL_1->Next.Y, (char*)LOCAL_1->Route, LOCAL_4, (char*)pHeightGrid);
+		
+		if(pMobGrid[LOCAL_1->Next.Y][LOCAL_1->Next.Y] == 0)
+			break;
+
+		if(LOCAL_4 != LOCAL_3)
+		{
+			GetEmptyMobGrid(0, (int*)&LOCAL_1->Next.X, (int*)&LOCAL_1->Next.Y);
+		
+			BASE_GetRoute(LOCAL_1->Last.X, LOCAL_1->Last.Y, (int*)&LOCAL_1->Next.X, (int*)&LOCAL_1->Next.Y, (char*)LOCAL_1->Route, LOCAL_4, (char*)pHeightGrid);
+			
+			if(pMobGrid[LOCAL_1->Next.Y][LOCAL_1->Next.Y] == 0)
+				break;
+		}
+	}
+
+	if(LOCAL_4 == -1 || !LOCAL_1->Route[0])
+	{
+		LOCAL_1->Next.X = LOCAL_1->Target.X;
+		LOCAL_1->Next.Y = LOCAL_1->Target.Y;
+
+		LOCAL_1->Route[0] = 0;
+	}
+}

@@ -1,0 +1,12 @@
+int BASE_GetGuild(int x, int y) //004089a0 - ok
+{
+	for(int i = 0; i < MAX_GUILDZONE; i++)
+	{
+		if(x >= g_pGuildZone[i].CityX && x <= g_pGuildZone[i].CityMaxX && y >= g_pGuildZone[i].CityY && y <= g_pGuildZone[i].CityMaxY)
+			return i;
+
+		continue;
+	}
+
+	return MAX_GUILDZONE;
+}

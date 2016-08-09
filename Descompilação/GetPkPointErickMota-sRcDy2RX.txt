@@ -1,0 +1,11 @@
+int GetPkPoint(int Cid)
+{
+	// 0x004012FD
+	
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	int LOCAL_1 = player->Inventory[63].EF1,
+	    LOCAL_2 = LOCAL_1 & 0xFF;
+
+	return LOCAL_2;
+}

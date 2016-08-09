@@ -1,0 +1,44 @@
+int BASE_InitializeBaseDef(void) // 00405b40 - ok
+{
+	memset(ChargedGuildList, 0, sizeof(ChargedGuildList));
+
+	BASE_InitializeServerList();
+
+	int ret = TRUE;
+	int tret = FALSE;			
+
+#ifdef WYD_CLIENT
+	#ifdef _DEBUG 
+		BASE_InitializeSkill();
+		BASE_WriteSkillBin();
+		BASE_InitializeEffectName(); 
+		BASE_InitializeItemList();	
+		for(int i = 0; i < MAX_ITEMLIST; i++)
+			BASE_UnderBarToSpace(g_pItemList[i].Name);
+
+		BASE_InitializeInitItem();
+		BASE_WriteInitItem();		   
+	#else
+		tret = BASE_ReadSkillBin();
+		ret = ret & tret;
+
+		tret = BASE_ReadItemList();
+		ret = ret & tret;
+		
+		tret = BASE_ReadInitItem();
+		ret = ret & tret;
+	#endif
+
+		memset(g_pClientGuildName, 0, sizeof(g_pClientGuildName));
+#else
+		BASE_InitializeSkill();
+		BASE_InitializeEffectName();
+		BASE_InitializeItemList();
+		BASE_InitializeInitItem();
+		BASE_InitializeGuildName();
+#endif
+		
+	BASE_InitializeAttribute();
+
+	return ret;
+}

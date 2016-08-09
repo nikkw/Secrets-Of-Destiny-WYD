@@ -1,0 +1,107 @@
+#ifndef _CPSOCK_
+#define _CPSOCK_ 
+
+#define WSA_READ				(WM_USER + 100)
+#define WSA_READDB				(WM_USER + 2) 
+#define WSA_ACCEPT				(WM_USER + 3) 
+#define WSA_ACCEPTADMIN			(WM_USER + 4) 
+#define WSA_READADMINCLIENT		(WM_USER + 5) 
+#define WSA_READADMIN			(WM_USER + 6) 
+#define WSA_READBILL			(WM_USER + 7) 
+#define WSA_READMSG				(WM_USER + 8)
+#define WSA_ACCEPTWEB			(WM_USER + 9)
+#define WSA_READWEB				(WM_USER + 10)
+#define WSA_READITEM			(WM_USER + 11)
+#define WSA_ACCEPTWHATSUP		(WM_USER + 12)
+
+#define MAX_PENDING_CONNECTS	8
+
+#define RECV_BUFFER_SIZE		(64 * 1024)
+#define SEND_BUFFER_SIZE		(64 * 1024)
+
+#define MAX_MESSAGE_SIZE		4500
+#define INITCODE				0x1F11F311
+
+typedef struct _HEADER
+{
+	unsigned short Size;
+	unsigned char Key;
+	unsigned char CheckSum;
+	unsigned short PacketId;
+	unsigned short ClientId;
+	unsigned int TimeStamp;
+} HEADER, *PHEADER;
+
+class  CPSock
+{   
+public:
+	unsigned int  Sock;		// 0 - 3
+	char*	pSendBuffer;	// 4 - 7
+	char*	pRecvBuffer;	// 8 - 11
+	int		nSendPosition;	// 12 - 15
+	int		nRecvPosition;	// 16 - 19
+	int		nProcPosition;	// 20 - 23
+	int		nSentPosition;	// 24 - 27
+	int     Init;			// 28 - 31
+
+public:
+	CPSock(); //ok
+	~CPSock(); //ok
+	BOOL	CloseSocket(void); //ok
+	BOOL	WSAInitialize(void); //ok
+	BOOL	StartListen(HWND hWnd, int ip, int Port, int WSA); //ok
+	SOCKET	ConnectServer(char* HostAddr, int Port, int ip, int WSA); //ok
+	SOCKET  ConnectBillServer(char* HostAddr, int Port, int ip, int WSA); //ok
+	BOOL	Receive(void); //ok
+	char*	ReadMessage(int* ErrorCode, int* ErrorType); //ok
+	char*	ReadBillMessage(int* ErrorCode, int* ErrorType); //ok
+	BOOL	SendBillMessage(char* Msg); //ok
+	BOOL	AddMessage(char* pMsg, int Size); //ok
+	void	RefreshRecvBuffer(void); //ok
+	void	RefreshSendBuffer(void); //ok
+	BOOL	SendMessage(void); //ok
+	BOOL	SendOneMessage(char* Msg, int Size); //ok
+};
+
+struct _AUTH_GAME{
+	int 	Packet_Type;	//	4
+	int		Result;			//	4 
+	char	S_KEY[32];		//	4*8	 
+	char	Session[32];	//  4*8
+	char	User_CC[4];		//	4
+	char	User_No[20];	//	4*5
+	char	User_ID[52];	//  4*13
+	char	User_IP[24];	//  4*6
+	char	User_Gender;	
+	char	User_Status[3];	//	4	
+	char	User_PayType[4];//	2 ?
+	int 	User_Age;		//  4
+	int 	Game_No;		//  4
+	char	Bill_PayType[2];
+	char	Bill_Method[2];	//	4
+	char	Bill_Expire[12];//	4*3 	
+	int 	Bill_Remain;	//	4
+};
+
+struct _AUTH_GAME2{
+	int 	Packet_Type;
+	int		Packet_result;
+	char	User_ID[52];
+	char	User_roleName[20];
+	int		Map_number;	
+	int		User_co[2];	
+	int		article_number;
+	int		Dressed;
+	int		Time_Exchanged;	
+	int		ItemNo;		
+	char	cardNumber[20];	
+	char	cardPassword[20];
+	char	messageflag[4];
+	char	activeMessage[20];	
+	char 	reserved[36];
+};
+
+#define g_cGame  (sizeof(_AUTH_GAME))
+#define g_cGame2  (sizeof(_AUTH_GAME2))
+
+#endif

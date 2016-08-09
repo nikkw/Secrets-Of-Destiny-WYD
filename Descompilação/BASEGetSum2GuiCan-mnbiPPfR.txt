@@ -1,0 +1,24 @@
+int BASE_GetSum2(char* p, int size) //00405f50 - ok
+{
+	int sum = 0;
+	for(int i = 0; i < size; i++)
+	{
+		int mod = i % 9;
+		if(mod == 0)
+			sum = sum + (p[i] * 2);
+		if(mod == 1)
+			sum = sum + (p[i] ^ 0xFF);
+		if(mod == 2)
+			sum = sum + (p[i] / 3);
+		if(mod == 3)
+			sum = sum + (p[i] * 2);
+		if(mod == 4)
+			sum = sum - (p[i] ^ 0x5A);
+		if(mod == 5)
+			sum = sum - p[i];
+		else
+			sum = sum + (p[i] / 5);
+	}
+
+	return sum;
+}

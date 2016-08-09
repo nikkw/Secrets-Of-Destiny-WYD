@@ -1,0 +1,11 @@
+void BASE_GetLanguage(char* str, int idx, char* parm1, char* parm2)
+{
+	if(idx < 0 || idx > 400)
+	{
+		strcpy(str, "[UNHANDLED]");
+		return;
+	}
+
+	sprintf(str, g_pMessageStringTable[idx << 7], parm1, parm2);
+	return;
+}

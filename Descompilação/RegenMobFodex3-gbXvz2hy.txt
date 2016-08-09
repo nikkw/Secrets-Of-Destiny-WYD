@@ -1,0 +1,284 @@
+struct pCL_181h // SHEPHER
+{
+	PacketHeader Header;
+
+	short curHP;
+	short curMP;
+	short maxHP;
+	short maxMP;
+};
+
+void RegenMob(int User)
+{
+	if (User <= 0 || User >= MAX_USER)
+		return;
+
+	int GuildID = pMob[User].GuildIndex;
+
+	if (CastleState <= 1
+		|| pMob[User].Target.X != 1046
+		|| pMob[User].Target.Y != 1690
+		|| GuildID <= 0
+		|| pMob[User].GuildMemberType < 1
+		|| GuildID == *(DWORD*) 0x4C7D00)
+	{
+		pUser[User].CountAltar = 0;
+	}
+	else
+	{
+		if (!pUser[User].CountAltar)
+		{
+			sprintf(temp, "%s %s,", (char*) 0x7D91D8, pMob[User].Name);
+			SendNotice(temp);
+		}
+
+		char Msg[16];
+
+		*(WORD*) &Msg[4] = 0x3AD;
+		*(WORD*) &Msg[0] = 16;
+		*(WORD*) &Msg[6] = User;
+		*(DWORD*) &Msg[12] = 1;
+
+		GridMulticast_OL2(pMob[User].Target.X, pMob[User].Target.Y, (BYTE*) &Msg, NULL);
+
+		pUser[User].CountAltar++;
+
+		if (pUser[User].CountAltar > 5)
+		{
+			sprintf(temp, "%s %s,", (char*) 0x7D9258, pMob[User].Name);
+			SendNotice(temp);
+
+			*(DWORD*) 0x4C7D00 = GuildID;
+			*(DWORD*) 0x4C7D4C = pMob[User].CapeInfo;
+
+			FinishCastleWar();
+
+			int i;
+
+			for (i = 0; i < MAX_USER; i++)
+				ClearCrown(i);
+
+			STRUCT_ITEM BonusAltharWin;
+
+			memset(&BonusAltharWin, 0, sizeof (STRUCT_ITEM));
+
+			BonusAltharWin.Index = 747;
+			BonusAltharWin.EF1 = 43;
+			BonusAltharWin.EFV1 = 9;
+
+			PutItem(User, &BonusAltharWin);
+		}
+	}
+
+	pUser[User].CharLoginTime++;
+
+	if (!pUser[User].CharLoginTime % 450)
+	{
+		int Frag = GetPKPoint(User);
+
+		if (Frag < 75)
+		{
+			Frag++;
+
+			SetPKPoint(User, Frag);
+
+			sprintf(temp, "PKPointPlus [%d] (%d)", Frag - 75, 1);
+			SendClientMessage(User, temp);
+		}
+
+		STRUCT_ITEM *MountBufferItem = &pMob[User].Equip[14];
+
+		if (MountBufferItem->Index >= 2300)
+		{
+			if (MountBufferItem->Index < 2330)
+			{
+				int Delay = BASE_GetBonusItemAbility(MountBufferItem, EF_INCUDELAY);
+
+				if (Delay > 0)
+				{
+					Delay--;
+
+					MountBufferItem->EFV3 = Delay;
+
+					SendItem(User, EQUIP, 14, &pMob[User].Equip[14]);
+
+					SendClientMessage(User, (char*) 0x7D88D8);
+				}
+			}
+		}
+
+		if (MountBufferItem->Index >= 2330 && MountBufferItem->Index < 2390 && MountBufferItem->EF1 > 0)
+		{
+			int v44 = MountBufferItem->EF3;
+
+			int v48 = (MountBufferItem->Index - 2330) % 30;
+
+			if (v48 <= 15)
+				v44 -= 2;
+			else
+				v44 -= 4;
+
+			if (v44 <= 1)
+			{
+				MountBufferItem->EF1 = 0;
+				MountBufferItem->EF3 = 4;
+
+				SendClientMessage(User, (char*) 0x7D89D8);
+
+				STRUCT_ITEM *Src50;
+
+				memcpy(Src50, MountBufferItem, sizeof(STRUCT_ITEM));
+
+				BYTE v4A = 0;
+
+				if (MountBufferItem->Index >= 2360 && MountBufferItem->Index < 2390)
+					ProcessAdultMount(User, 0);
+				if (MountBufferItem->Index < 2360)
+					MountProcess(User, Src50);
+				else
+					pMob[User].GetCurrentScore(User);
+			}
+			else
+				MountBufferItem->EF3 = v44;
+
+			SendItem(User, EQUIP, 14, &pMob[User].Equip[14]);
+		}
+	}
+
+	int Guilty = GetGuilty(User);
+
+	if (Guilty > 0)
+	{
+		Guilty--;
+
+		SetGuilty(User, Guilty);
+
+		if (Guilty == 0)
+		{
+			p613_GetCreateMob m;
+
+			GetCreateMob(User, (BYTE*) &m);
+
+			GridMulticast_OL2(pMob[User].Target.X, pMob[User].Target.Y, (BYTE*) &m, 0);
+
+			for (int s = MAX_USER; s < 30000; s++)
+			{
+				if (pMob[s].Mode != 5)
+					continue;
+				if (pMob[s].CapeInfo != 4)
+					continue;
+
+				if (pMob[s].CurrentTarget == User)
+				{
+					pMob[s].CurrentTarget = 0;
+					pMob[s].Mode = 4;
+				}
+
+				for (int l = 0; l < 4; l++)
+				{
+					if (pMob[s].EnemyList[l] != User)
+						continue;
+
+					pMob[s].EnemyList[l] = 0;
+					pMob[s].Mode = 4;
+				}
+			}
+		}
+	}
+
+	int vCC = 100;
+	int vD0 = 10;
+
+	int vD4 = GetAttribute(pMob[User].Target.X, pMob[User].Target.Y);
+
+	LOBYTE(vD4);
+
+
+	if (vD4 & 1)
+	{
+		vCC = 200;
+		vD0 = 20;
+	}
+	if (vD4 & 8 || vD4 & 32)
+	{
+		vCC = 400;
+		vD0 = 50;
+	}
+	else
+	{
+		if ((BYTE) &pMob[User].AffectInfo & 16)
+		{
+			int vD8 = pMob[User].Status.Master[1];
+
+			vD8 /= 10;
+
+			if (vD8 < 0)
+				vD8 = 0;
+			if (vD8 > 20)
+				vD8 = 20;
+
+			vCC = vD8 + 110;
+			vD0 = 20;
+		}
+	}
+
+	if (pMob[User].Mode)
+	{
+		if (pMob[User].Status.curHP)
+		{
+			if (User >= MAX_USER || pUser[User].Status == 22)
+			{
+				int maxHP = pMob[User].Status.maxHP;
+				int maxMP = pMob[User].Status.maxMP;
+				int curHP = pMob[User].Status.curHP;
+				int curMP = pMob[User].Status.curMP;
+
+				int calcRegenHPMP = pMob[User].RegenHP;
+
+				calcRegenHPMP = calcRegenHPMP * vCC / 100;
+
+				int calcRegenHP = maxHP * calcRegenHPMP / 120 + vD0;
+
+				curHP = curHP + calcRegenHP;
+
+				if (curHP > maxHP)
+					curHP = maxHP;
+
+				pMob[User].Status.curHP = curHP;
+
+				calcRegenHPMP = pMob[User].RegenMP;
+
+				calcRegenHPMP = calcRegenHPMP * vCC / 100;
+
+				int calcRegenMP = maxMP * calcRegenHPMP / 120 + vD0;
+
+				curMP = curMP + calcRegenMP;
+
+				if (curMP > maxMP)
+					curMP = maxMP;
+
+				pMob[User].Status.curMP = curMP;
+
+				BYTE pSend[20];
+
+				*(WORD*) &pSend[0] = 20;
+				*(WORD*) &pSend[4] = 0x181;
+				*(WORD*) &pSend[6] = User;
+
+				*(WORD*) &pSend[12] = curHP;
+				*(WORD*) &pSend[14] = curMP;
+
+				SetReqHp(User);
+				SetReqMp(User);
+
+				*(WORD*) &pSend[16] = pUser[User].Potion.CountHp;
+				*(WORD*) &pSend[18] = pUser[User].Potion.CountMp;
+
+				int TargetX = pUser[User].nTargetX;
+				int TargetY = pUser[User].nTargetY;
+
+				GridMulticast_OL2(TargetX, TargetY, (BYTE*) &pSend, 0);
+			}
+		}
+	}
+}

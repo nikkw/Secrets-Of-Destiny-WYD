@@ -1,0 +1,12 @@
+int GetEmptyAffect(int mobId, int buffId)
+{
+	for(int i = 0;i<16;i++)
+		if(Spawn[mobId].Affect[i].Index == buffId)
+			return i;
+
+	for(int i = 0;i<16;i++)
+		if(!Spawn[mobId].Affect[i].Index)
+			return i;
+
+	return -1;
+}

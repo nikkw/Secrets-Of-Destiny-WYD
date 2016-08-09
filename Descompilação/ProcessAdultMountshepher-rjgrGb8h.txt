@@ -1,0 +1,42 @@
+void ProcessAdultMount(int clientId, int damage)
+{
+	st_Mob *player = GetMobFromIndex(clientId);
+	st_Item *LOCAL_1 = &player->Equip[14];
+
+	if(LOCAL_1->Index < 2360 || LOCAL_1->Index >= 2390)
+		return;
+
+	INT32 LOCAL_2 = LOCAL_1->Index - 2360;
+	INT32 LOCAL_3 = 0; // mount[LOCAL_2 + 10].maxHP; buffer das montarias
+	INT32 LOCAL_4 = LOCAL_1->Effect[2].Index;
+	
+	if(LOCAL_4 <= 0)
+	{
+		if(LOCAL_1->Effect[1].Index)
+		{
+			*(WORD*)&LOCAL_1->Effect[0].Index = 0;
+			LOCAL_4 = 0;
+		}
+	}
+
+	INT32 LOCAL_5 = *(WORD*)&LOCAL_1->Effect[0].Index;
+	INT32 LOCAL_6 = *(WORD*)&LOCAL_1->Effect[0].Index - damage; // EBP - 18h
+
+	if(LOCAL_6 >= LOCAL_3)
+		LOCAL_6 = LOCAL_3;
+
+	INT32 LOCAL_7 = LOCAL_6;
+
+	*(WORD*)&LOCAL_1->Effect[0].Index = LOCAL_7;
+
+	// Ração down
+	if(LOCAL_6 <= 0)
+		LOCAL_1->Effect[2].Index = 0;
+
+	// Pet morreu
+	if(LOCAL_5 > 0 && LOCAL_6 <= 0)
+		Fix_SendEquip(clientId, 0); // 401069
+
+	if(LOCAL_5 != LOCAL_6 && clientId < MAX_PLAYER)
+		//SendItens(clientId, 14); Atualizar slot 15 -> 4015C3
+}

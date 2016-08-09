@@ -1,0 +1,10 @@
+int BASE_GetAccuracyRate(st_Status* arg)
+{ // 40C1E0
+	INT LOCAL_1 = arg->DEX;
+	LOCAL_1 = LOCAL_1 >> 1 + 50;
+	
+	if(LOCAL_1 > 100)
+		LOCAL_1 = 100;
+
+	return LOCAL_1;
+}

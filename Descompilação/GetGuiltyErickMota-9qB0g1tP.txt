@@ -1,0 +1,17 @@
+int GetGuilty(int Cid)
+{
+	// 0x004012CB
+
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	int LOCAL_1 = player->Inventory[63].EF2;
+	int LOCAL_2 = LOCAL_1 & 0xFF;
+
+	if(LOCAL_2 > 50)
+	{
+        player->Inventory[63].EF2 = 0; // 0041E775  |. C680 906C5C01 >MOV BYTE PTR DS:[EAX+15C6C90],0
+        LOCAL_2 = 0;
+	}
+
+	return LOCAL_2;
+}

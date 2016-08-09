@@ -1,0 +1,14 @@
+void SendNoticeArea(char *Message, int x1, int y1, int x2, int y2)
+{
+	//0x00401177;
+	int LOCAL_1 = 0;
+	for(; LOCAL_1 < 100; LOCAL_1++)
+	{
+		if(Users[LOCAL_1].Status != 22)
+			continue;
+
+		if(CMob[LOCAL_1].TargetX >= x1 && CMob[LOCAL_1].TargetX <= x2
+		&& CMob[LOCAL_1].TargetY >= y1 && CMob[LOCAL_1].TargetY <= y2)
+		    SendClientMessage(LOCAL_1, Message);
+	}
+}

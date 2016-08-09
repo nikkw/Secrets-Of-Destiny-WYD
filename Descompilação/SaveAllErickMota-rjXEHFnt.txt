@@ -1,0 +1,15 @@
+void SaveALL()
+{
+	// 0x004014B0
+
+	int LOCAL_1 = 0;
+
+	for(; LOCAL_1 < MAX_PLAYER; LOCAL_1++)
+	{
+		if(cUsers[LOCAL_1].Status != 22)
+			continue;
+
+		CharLogOut(LOCAL_1); // 0x004013B6
+		//Log("saveall", cUsers[LOCAL_1].Username, cUsers[LOCAL_1].In_Addr);
+	}
+}

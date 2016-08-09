@@ -1,0 +1,153 @@
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )//0x0042cd80 - ok
+{
+	MSG msg;
+	ZeroMemory(&msg, sizeof(msg));
+
+	if(hPrevInstance == 0 || InitApplication(hInstance) == 0)
+		return FALSE;
+
+	if(InitInstance(hInstance, nCmdShow) == 0)
+		return FALSE;
+
+	hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEVICE_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,	DEFAULT_PITCH | FF_DONTCARE, "Fixedsys");
+	BASE_InitModuleDir();
+	//BASE_InitializeHitRate();
+	//StartLog();
+
+	//memset(g_pTreasure, 0, sizeof STRUCT_TREASURE);
+	//ReadConfig();
+	ConfigReady = TRUE;
+	//DrawConfig(0);
+
+	//memset(g_pGuildWar, 0, 0x20000);
+	//memset(g_pGuildAlly, 0, 0x20000);
+
+	int ret = ListenSocket.WSAInitialize();
+	if(ret == NULL)
+	{
+		//Log("err, WSAInitialize Fail", "-system", NULL);
+		return FALSE;
+	}
+
+	//Reboot(); //0042CE9E
+	//SetCastleDoor(TRUE); //0042CEA5
+
+	char Str2;
+	FILE* fp = fopen("localip.txt", "rt");
+	if(fp != NULL)
+	{
+		fscanf(fp, "%s", &Str2);
+		fclose(fp);
+	}
+	else
+	{
+		MessageBox(hWndMain, "Can't find localip.txt", "REBOOTING ERROR", NULL);
+	}
+
+	int r1, r2, r3, r4;
+	sscanf(&Str2, "%d.%d.%d.%d", &r1, &r2, &r3, &r4);
+	LocalIP[0] = r1;
+	LocalIP[1] = r2;
+	LocalIP[2] = r3;
+	LocalIP[3] = r4;
+	DBServerAddress[0] = 0;
+
+	for(int i = 0; i < MAX_SERVERGROUP; i++)
+	{
+		for(int j = 1; j < MAX_SERVERNUMBER; j++)
+		{
+			if(!strcmp(g_pServerList[i][j], &Str2))
+			{
+				strcpy(DBServerAddress, g_pServerList[i][0]);
+				ServerGroup = i;
+				ServerIndex = j - 1;
+				break;
+			}
+		}
+
+		if(DBServerAddress[0] != 0)
+			break;
+	}
+
+	//0042D04F
+	if(DBServerAddress[0] == 0)
+	{
+		MessageBox(hWndMain, "Can't get Server Group Index. check [Locakip.txt] and [ServerList.txt]", "Error", MB_OK | MB_SYSTEMMODAL);
+		return TRUE;
+	}
+
+	DBServerPort = DB_PORT;
+	int* Ip = (int*)LocalIP;
+
+	ret = DBServerSocket.ConnectServer(DBServerAddress, DBServerPort, *Ip, WSA_READDB);
+	if(ret == NULL)
+	{
+		//Log("err, Can't connect to DB-Server.", "-system", NULL);
+		MessageBox(hWndMain, "Can't connect to DB-SERVER", "REBOOTING ERROR", NULL);
+		return FALSE;
+	}
+
+	NumServerInGroup = 0;
+	for(int k = 1; k < MAX_SERVERNUMBER; k++)
+	{
+		if(g_pServerList[ServerGroup][k] == 0)
+			continue;
+
+		NumServerInGroup++;
+	}
+
+	//0042D162
+	if(NumServerInGroup <= 0)
+		NumServerInGroup = 1;
+	if(NumServerInGroup > 10)
+		NumServerInGroup = 10;
+
+	if(!strcmp(DBServerAddress, "192.168.0.13"))
+		TESTSERVER = 1;
+	if(!strcmp(DBServerAddress, "192.168.0.13"))
+		LOCALSERVER = 1;
+
+	fp = fopen("biserver.txt", "rt");
+	if(fp != NULL)
+	{
+		fscanf(fp, "%s %d", BillServerAddress, &BillServerPort);
+		fclose(fp);
+	}
+
+	if(BILLING > 0)
+	{
+		int* Ip = (int*)LocalIP;
+		ret = BillServerSocket.ConnectBillServer(BillServerAddress, BillServerPort, *Ip, WSA_ACCEPTADMIN);
+		if(ret == NULL)
+		{
+			//Log("err, Can't connect Billing server.", "-system", NULL);
+			BILLING = 0;
+		}
+		else
+		{
+			_AUTH_GAME sm;
+			memset(&sm, 0, sizeof(sm));
+			//SendBilling2(&sm, _Msg_BillLogin);
+		}
+	}
+
+	//0042D2A7
+	//ReadChallanger();
+	//ReadGuild();
+
+	memset(FailAccount, 0, sizeof FailAccount);
+	CurrentTime = timeGetTime();
+	SetTimer(hWndMain, TIMER_SEC, TICKSIZE, NULL); 
+	SetTimer(hWndMain, TIMER_MIN, 12000, NULL);
+
+	ListenSocket.StartListen(hWndMain, *Ip, GAME_PORT, WSA_ACCEPT);
+	//GuildZoneReport();
+
+	while(GetMessage(&msg, NULL, 0, 0))
+    {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg); 
+    }
+
+    return (msg.wParam);  
+}

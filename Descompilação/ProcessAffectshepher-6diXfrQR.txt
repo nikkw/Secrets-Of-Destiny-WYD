@@ -1,0 +1,270 @@
+// Boa parte feita, mas tem que revisar bem, principalmente a parte das fadas e etc.
+// Parte do Aura Bestial / Trovão não feitas
+
+int ProcessAffect(int clientId)
+{
+	st_Mob *player = GetMobFromIndex(clientId);
+	INT32 LOCAL_1 = 0;
+	INT32 LOCAL_2 = 0;
+	INT32 LOCAL_3 = 0;
+	INT32 LOCAL_4 = 0;
+	INT32 LOCAL_5 = player->Equip[13].Index;
+
+	if(clientId < MAX_PLAYER && (LOCAL_5 == 754 || LOCAL_5 == 769 || LOCAL_5 == 1726))
+	{
+		INT32 LOCAL_6 = player->CurrentTarget;
+
+		if(LOCAL_6)
+		{
+			if(LOCAL_6 != clientId)
+			{
+				if(LOCAL_6 <= 0 || LOCAL_6 > 30000)
+					player->CurrentTarget = 0;
+				else
+				{
+					if(player->Mode == 0)
+						player->CurrentTarget = 0;
+					else
+					{
+						INT32 LOCAL_7 = 0; //GET ATTRIBUTE
+
+						if(LOCAL_7 & (0xFF | 0x40))
+						{
+							if(LOCAL_6 < MAX_PLAYER) // || Spawn[LOCAL_6].CapeInfo == 4)
+								player->CurrentTarget = 0;
+							else
+						}
+					}
+				}
+
+				INT32 LOCAL_8 = player->Leader;
+				if(LOCAL_8 == 0)
+					LOCAL_8 = clientId;
+
+				st_Mob *mobLOCAL_6 = GetMobFromIndex(LOCAL_6);
+				INT32 LOCAL_9 = player->Leader;
+				if(LOCAL_9 == 0)
+					LOCAL_9 = LOCAL_6;
+
+
+				INT32 LOCAL_10 = player->GuildIndex;
+				if(player->GuildDisable != 0)
+					LOCAL_10 = 0;
+
+				INT32 LOCAL_11 = mobLOCAL_6->GuildIndex;
+				if(mobLOCAL_6->GuildDisable != 0)
+					LOCAL_11 = 0;
+
+				if(LOCAL_10 == 0 && LOCAL_11 == 0)
+					LOCAL_10 = -1;
+
+				if(LOCAL_8 == LOCAL_9 || LOCAL_10 == LOCAL_11)
+					player->CurrentTarget = 0;
+				else if(mobLOCAL_6->AffectInfo.Snoop)
+					player->CurrentTarget = 0;
+				else if(mobLOCAL_6->Status.Level >= 355 || !mobLOCAL_6->Info.Merchant)
+					player->CurrentTarget = 0;
+				else
+				{
+					INT32 LOCAL_12 = 0;
+					INT32 LOCAL_13 = player->CapeInfo;
+					INT32 LOCAL_14 = mobLOCAL_6->CapeInfo; 
+
+					if((LOCAL_13 == 7 && LOCAL_14 == 7) || (LOCAL_13 == 8 && LOCAL_14 == 8))
+						LOCAL_12 = 1;
+
+					if(LOCAL_12 != 1 && Users[clientId].AllStatus.PK != 0)
+					{
+						if(LOCAL_12 == 1 || LOCAL_6 <= MAX_PLAYER)
+						{
+							INT32 LOCAL_15 = player->Target.X;
+							INT32 LOCAL_16 = player->Target.Y;
+
+							if(mobLOCAL_6->Target.X >= (LOCAL_15 - 23) && mobLOCAL_6->Target.X <= (LOCAL_15 + 23) && 
+								mobLOCAL_6->Target.Y >= (LOCAL_16 - 23) && mobLOCAL_6->Target.Y <= (LOCAL_16 + 23))
+							{
+								p39D_613 packet;
+								memset(&packet, 0, sizeof packet);
+
+								packet.Header.PacketId = 0x39D;
+								packet.Header.ClientId = clientId;
+								packet.Header.Size = sizeof packet;
+
+								INT32 LOCAL_25 = 0x0E0A1ACA;
+
+								packet.m_AttackerPosition.X = player->Target.X;
+								packet.m_AttackerPosition.Y = player->Target.Y;
+
+								packet.m_ClientId = clientId;
+								packet.m_Motion = 0xFE;
+
+								packet.m_SkillId = 32;
+								if(LOCAL_5 == 769)
+									packet.m_SkillId = 34;
+								else if(LOCAL_5 == 1726)
+									packet.m_SkillId = 36;
+
+								packet.m_Target.Index = LOCAL_6;
+								packet.m_Target.Damage = 0xFFFF;
+								// 004505C9
+
+								ProcessClientMessage(clientId, (BYTE*)&packet);
+							}
+							else
+								player->CurrentTarget = 0;
+						}
+					}
+				}
+			}
+			else
+				player->CurrentTarget = 0;
+		}
+	}
+
+	for(INT32 LOCAL_28 = 0; LOCAL_28 < 16; LOCAL_28 ++)
+	{
+		INT32 LOCAL_29 = mBuffer[clientId].Affects[LOCAL_28].Index;
+		if(LOCAL_29 <= 0)
+			continue;
+
+		INT32 LOCAL_30 = player->Status.maxHP;
+		INT32 LOCAL_31 = player->Status.curHP;
+		INT32 LOCAL_32 = mBuffer[clientId].Affects[LOCAL_28].Master;
+		INT32 LOCAL_33 = mBuffer[clientId].Affects[LOCAL_28].Value;
+		INT32 LOCAL_34 = player->Status.Level;
+
+		if(LOCAL_29 == 17) // AURA DA VIDA
+		{
+			INT32 LOCAL_35 = LOCAL_33 >> 1 + LOCAL_32;
+			LOCAL_31 = LOCAL_31 + LOCAL_35;
+
+			if(LOCAL_31 < 1)
+				LOCAL_31 = 1;
+
+			if(LOCAL_31 > LOCAL_30)
+				LOCAL_31 = LOCAL_30;
+
+			if(player->Status.curHP != LOCAL_31)
+				LOCAL_1 = 1;
+
+			LOCAL_4 = player->Status.curHP - LOCAL_31;
+
+			player->Status.curHP = LOCAL_31;
+
+			LOCAL_3 = 1;
+		}
+		else if(LOCAL_29 == 20) // VENENO 
+		{
+			LOCAL_32 = 100;
+			if(clientId >= MAX_PLAYER)
+				LOCAL_32 = LOCAL_32 - player->Learn;
+
+			LOCAL_32 = LOCAL_32 / 10;
+
+			float LOCAL_164 = (100 - LOCAL_32) / 100.0;
+			INT32 LOCAL_37 = 1000;
+
+			if(clientId >= MAX_PLAYER)
+				LOCAL_37 = (100 - player->Learn) / 10;
+
+			INT32 LOCAL_38 = (LOCAL_31 - LOCAL_37) * LOCAL_164;
+
+			if(LOCAL_31 < LOCAL_38)
+				LOCAL_31 = LOCAL_38;
+
+			if(LOCAL_31 < 1)
+				LOCAL_31 = 1;
+
+			if(LOCAL_31 > LOCAL_30)
+				LOCAL_31 = LOCAL_30;
+
+			if(player->Status.curHP != LOCAL_31)
+				LOCAL_1 = 1;
+
+			LOCAL_4 = player->Status.curHP - LOCAL_31;
+				
+			player->Status.curHP = LOCAL_31;
+
+			// Aqui ele adiciona a parada na struct
+			//	if(clientId > 0 && clientId < MAX_PLAYER)
+
+			LOCAL_3 = 1;
+
+			if(clientId > MAX_PLAYER && player->CapeInfo == 4)
+				LinkMountHp(clientId);
+		}
+		else if(LOCAL_29 == 21)
+		{
+			INT32 LOCAL_39 = LOCAL_30;
+				
+			LOCAL_39 = LOCAL_39 * LOCAL_32 / 100;
+
+			LOCAL_31 = LOCAL_31 + LOCAL_39;
+
+			if(LOCAL_31 < 1)
+				LOCAL_31 = 1;
+
+			if(LOCAL_31 > LOCAL_30)
+				LOCAL_31 = LOCAL_30;
+				
+			if(player->Status.curHP != LOCAL_31)
+				LOCAL_1 = 1;
+
+			LOCAL_4 = player->Status.curHP - LOCAL_31;
+				
+			player->Status.curHP = LOCAL_31;
+		}
+
+		if(mBuffer[clientId].Affects[LOCAL_28].Time < 1000)
+			mBuffer[clientId].Affects[LOCAL_28].Time -= 1;
+
+		if(mBuffer[clientId].Affects[LOCAL_28].Time <= 0)
+		{
+			if(mBuffer[clientId].Affects[LOCAL_28].Index == 16)
+				LOCAL_2 = 1;
+
+			mBuffer[clientId].Affects[LOCAL_28].Index = 0;
+			mBuffer[clientId].Affects[LOCAL_28].Time = 0;
+			mBuffer[clientId].Affects[LOCAL_28].Master = 0;
+		}
+	}
+
+	if(LOCAL_3 != 0)
+	{
+		//if(clientId > 0 && clientId < MAX_PLAYER)
+		//{	SetReqHp(clientId) SetReqMp(clientId); }
+
+		p18A packet;
+		packet.Header.PacketId = 0x18A;
+		packet.Header.Size = 16;
+		packet.Header.ClientId = clientId;
+
+		packet.CurHP = player->Status.curHP;
+		packet.Incress = LOCAL_4;
+
+		INT32 LOCAL_162 = player->Target.X;
+		INT32 LOCAL_163 = player->Target.Y;
+
+		GridMulticast_2(LOCAL_162, LOCAL_163, &packet, 0);
+	}
+
+	if(LOCAL_1 != 0)
+	{
+		GetCurrentScore(clientId);
+
+		SendScore(clientId);
+
+		if(LOCAL_2 != 0)
+			SendItens(clientId, 0);
+
+		return 1;
+	}
+
+	return 0;
+	/*
+			break;
+			case 22: // TROVÃO - 00450943
+				break;
+			case 23: // AURA BESTIAL
+				break;
+}

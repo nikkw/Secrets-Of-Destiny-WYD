@@ -1,0 +1,30 @@
+int BASE_ReadSkillBin() //00406480 - ok
+{
+	int size = sizeof(STRUCT_SPELL) * MAX_SKILL;
+	char* temp = (char *)g_pSpell;
+	int tsum = 0;
+
+	FILE* fp = fopen("SkillData.bin", "rb");
+	if(fp != NULL)
+	{
+		fread(g_pSpell, size , 1 , fp);
+		fread(&tsum, sizeof(tsum), 1 , fp);
+		fclose(fp);
+	}
+	else
+	{
+		MessageBox(NULL, "Can't read SkillData.bin", "ERROR",NULL);
+		return FALSE;
+	}
+
+	int sum = BASE_GetSum2((char*)g_pSpell, size);
+	#ifndef _DEBUG
+		if(SKILL_CHECKSUM != sum)
+			return FALSE;
+	#endif
+
+	for(int i = 0; i < size; i++)
+		temp[i] = temp[i] ^ 0x5A;
+
+	return TRUE;
+}

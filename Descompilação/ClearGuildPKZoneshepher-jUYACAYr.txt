@@ -1,0 +1,22 @@
+void ClearGuildPKZone()
+{ // 456C80
+	INT32 LOCAL_1 = 128;
+	INT32 LOCAL_2 = 128;
+	INT32 LOCAL_3 = 256;
+	INT32 LOCAL_4 = 256;
+	
+	INT32 LOCAL_5 = 0;
+	for( ; LOCAL_5 < 100; LOCAL_5++)
+	{
+		if(Users[LOCAL_5].Status != 16)
+			continue;
+
+		if(CMob[LOCAL_5].Mode == 0)
+			continue;
+
+		if(CMob[LOCAL_5].Target.X < LOCAL_1 && CMob[LOCAL_5].Target.X > LOCAL_3 && CMob[LOCAL_5].Target.Y < LOCAL_2 && CMob[LOCAL_5].Target.Y > LOCAL_4)
+			continue;
+
+		DoRecall(LOCAL_5);
+	}
+}

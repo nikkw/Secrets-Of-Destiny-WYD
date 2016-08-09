@@ -1,0 +1,32 @@
+STRUCT_ITEM* GetItemPointer(STRUCT_MOB* mob, STRUCT_ITEM* cargo, int type, int pos) //00405320 - ok
+{
+	STRUCT_ITEM* ret = NULL;
+	if(type == EQUIP_TYPE)
+	{
+		if(pos < 0 || pos >= MAX_EQUIP)
+			return NULL;
+
+		ret = &mob->Equip[pos];
+	}
+	else if(type == INV_TYPE)
+	{
+		if(pos < 0 || pos >= MAX_INVEN)
+			return NULL;
+
+		ret = &mob->Inventory[pos];
+	}
+	else if(type == STORAGE_TYPE)
+	{
+		if(pos < 0 || pos >= MAX_CARGO)
+			return NULL;
+
+		ret = &cargo[pos];
+	}
+	else
+		return NULL;
+
+	if(ret->Index <= 0 || ret->Index > MAX_ITEMLIST)
+		return NULL;
+
+	return ret;
+}

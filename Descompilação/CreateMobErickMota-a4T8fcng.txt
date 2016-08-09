@@ -1,0 +1,136 @@
+int CreateMob(char* Name, int arg2, int arg3, char* arg4) 
+{
+	//0x004013F7
+	int LOCAL_1 = GetEmptyNPCMob();
+	
+	if(!LOCAL_1)
+	{
+		sprintf(0x008B7E678, "err, no emptymob create %s", arg1);
+
+		Log(0x008B7E678, "-system", 0); 
+
+		return -1;
+	}
+
+	strcpy(CMob[LOCAL_1].Name, arg1);
+	memset(CMob[LOCAL_1].PartyList, 0, 0x18); 
+
+	int LOCAL_2 = ReadMob(CMob(LOCAL_1], arg4);
+
+	if(!LOCAL_2)
+		return -1;
+
+	CMob[LOCAL_1].Name[15] = 0;
+	CMob[LOCAL_1].BaseScore.Reserved = 0;
+
+	int LOCAL_3 = 0;
+	for(; LOCAL_3 < 16; LOCAL_3++)
+	{
+		if(CMob[LOCAL_1].Name[LOCAL_3] == 0x5F)
+			CMob[LOCAL_1].Name[LOCAL_3] = 0x20;
+	}
+
+	memset(CMob[LOCAL_1].Affects, 0, 0x20); 
+
+	for(LOCAL_3 = 0; LOCAL_3 < 5; LOCAL_3++)
+	{
+		if(CMob[LOCAL_1].Equip[0].Index == 219)
+		{
+			CMob[LOCAL_1].SegmentListX[LOCAL_3] = arg2;
+			CMob[LOCAL_1].SegmentListY[LOCAL_3] = arg3;
+
+			continue;
+		}
+
+		CMob[LOCAL_1].SegmentListX[LOCAL_3] = arg2 + ((Rand() % 5) - 2);
+		CMob[LOCAL_1].SegmentListY[LOCAL_3] = arg3 + ((Rand() % 5) - 2);
+	}
+
+	if(CMob[LOCAL_1].Equip[0].Index == 219)
+	{
+		int LOCAL_4 = 0x008BF1858;
+
+		if(LOCAL_4 > 0 && LOCAL_4 < 100)
+		{
+			if(CUsers[LOCAL_4].Status == 22)
+			{
+				CMob[LOCAL_1].Equip[15].Index = CMob[LOCAL_4].Equip[15].Index;
+				CMob[LOCAL_1].Equip[15].EFV2 = CMob[LOCAL_4].Equip[15].EFV2;
+
+				if(CMob[LOCAL_1].Equip[0].Index == 219)
+				{
+					CMob[LOCAL_1].Equip[12].Index = CMob[LOCAL_4].Equip[12].Index;
+					CMob[LOCAL_1].Equip[12].EFV2 = CMob[LOCAL_4].Equip[12].EFV2;
+					
+					GetGuild_OL1(LOCAL_1);
+
+					if(CMob[LOCAL_1].Equip[12].Index == 509)
+						CMob[LOCAL_1].Equip[12].Index = 508;
+				}
+			}
+		}
+	}
+
+	CMob[LOCAL_1].GenerateIndex = -1; // Byte 960 da st_mob
+	CMob[LOCAL_1].Formation = 0; // Byte 796
+	CMob[LOCAL_1].RouteType = 0;
+	CMob[LOCAL_1].Mode = 4;
+	CMob[LOCAL_1].SegmentProgress = 0;
+	CMob[LOCAL_1].Leader = 0;
+	CMob[LOCAL_1].WaitSec = 10;
+	CMob[LOCAL_1].LastTime = 0x008BF17D8;
+
+	CMob::GetCurrentScore(100); // PUSH 64, ECX = CMob[LOCAL_1]
+
+	CMob[LOCAL_1].Status.curHP = CMob[LOCAL_1].Status.maxHP;
+	CMob[LOCAL_1].SegmentDirection = 0;
+
+	memset(CMob[LOCAL_1].EnemyList, 0, 0x08);
+
+	int  LOCAL_5 = CMob[LOCAL_1].SegmentListX[0],
+		 LOCAL_6 = CMob[LOCAL_1].SegmentListY[0],
+		 LOCAL_7 = GetEmptyMobGrid(LOCAL_1, &LOCAL_5, &LOCAL_6);
+
+	if(!LOCAL_7)
+	{
+		strcpy(0x008B7E678, "err,No empty mobgrid:%s x:%d y:%d", Name, CMob[LOCAL_1].SegmentListX[0], CMob[LOCAL_1].SegmentListX[0]);
+		Log(0x008B7E678, "-system", 0); 
+
+		CMob[LOCAL_1].Mode = 0;
+		CMob[LOCAL_1].Name[0] = 0;
+		CMob[LOCAL_1].GenerateIndex = 0;
+
+		return -2;
+	}
+
+	CMob[LOCAL_1].SegmentX = LOCAL_5;
+	CMob[LOCAL_1].TargetX  = LOCAL_5;
+	CMob[LOCAL_1].LastX    = LOCAL_5;
+
+	CMob[LOCAL_1].SegmentY = LOCAL_6;
+	CMob[LOCAL_1].TargetY  = LOCAL_6;
+	CMob[LOCAL_1].LastY    = LOCAL_6;
+
+	int LOCAL_8 = CMob[LOCAL_1].bStatus.maxMP;
+
+	if(LOCAL_8)
+	{
+		SetAffect(LOCAL_1, LOCAL_8, 0x7530, 0xC8);
+		SetTick(LOCAL_1, LOCAL_8, 0x7530, 0xC8);
+	}
+
+	MSG_CREATEMOB P;
+	GetCreateMob(LOCAL_1, &P);
+
+	int LOCAL_9 = (LOCAL_9 & 0x0FFFF) | 2;
+	
+	LOCAL_6 = LOCAL_6 << 0x0D;
+
+	int UNKADRESS = (LOCAL_6 + LOCAL_5 * 2 + 0X003B07D14);
+	UNKADRESS = LOCAL_1;
+	// Provavelmente algum buffer que eu não sei qual é
+
+	GridMulticast_OL2(LOCAL_5, LOCAL_6, &P, 0);
+
+	return 1;
+}

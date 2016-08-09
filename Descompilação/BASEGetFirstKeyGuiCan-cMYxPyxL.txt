@@ -1,0 +1,42 @@
+char KorFirst[40] = {"ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"};
+int  KorIndex[19] = {171, 291, 432, 560, 646, 773, 902, 1031, 1104, 1237, 1353, 1561, 1696, 1770, 1890, 1997, 2103, 2208, 2350};
+void BASE_GetFirstKey(char* source, char* dest) //00408800 - ok
+{
+	if((source[0] >= 'A' && source[0] <= 'Z') || (source[0] >= 'a' && source[0] <= 'z'))
+	{
+		dest[0] = source[0];
+		dest[1] = 0;
+		return;
+	}
+	else if(source[0] < 0)
+	{
+		unsigned char* unsource = (unsigned char*)source;
+		int Point = (unsource[0] - 0xb0) * 94 + unsource[1] - 0xa1; 
+		if(Point < 0 || Point >= 2350)
+		{
+			strcpy(dest, "etc");
+			return;
+		}
+
+		int a;
+		for(a = 0; a < 18; a++)
+			if(Point < KorIndex[a])
+				break;
+
+		if(a >= 0 && a <= 17)
+		{
+			dest[0] = KorFirst[a * 2];
+			dest[1] = KorFirst[a * 2 + 1];
+			dest[2] = 0;
+		}
+		else
+		{
+			strcpy(dest, "etc");
+			return;
+		}
+	}
+	else
+	{
+		strcpy(dest, "etc");
+	}
+}

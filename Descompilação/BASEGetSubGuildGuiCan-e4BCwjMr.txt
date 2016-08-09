@@ -1,0 +1,8 @@
+int BASE_GetSubGuild(int MedalID) //00408d00 - ok
+{
+	int ret = FALSE;
+	if(MedalID >= 526 && MedalID <= 537)
+		ret = (((MedalID - 526) / 3) + 1);
+
+	return ret;
+}

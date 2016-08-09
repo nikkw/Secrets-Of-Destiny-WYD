@@ -1,0 +1,39 @@
+//O Player ali é a pUser.
+void RemoveTrade(int User)
+{
+	if(User <= 0 || User >= MAX_USER)
+		return;
+
+	memset(&Player[User].Trade, 0, sizeof (STRUCT_TRADE));
+
+	for(int i=0; i<MAX_TRADE; i++)
+	{
+		Player[User].Trade.InvenPos[i] = 255;
+	}
+
+	memset(&pUser[User].AutoTrade, 0, sizeof (pUser[0].AutoTrade));
+
+	for(int i=0; i<12; i++)
+	{
+		pUser[User].AutoTrade.Slots[i] = 255;
+	}
+
+	if(pUser[User].Mode != USER_PLAY)
+		return;
+
+	SendClientSignal(User,User,0x384);
+
+	if(pUser[User].IsAutoTrading != 0)
+	{
+		int TargetX = pMob[User].Target.X;
+		int TargetY = pMob[User].Target.Y;
+
+		p613_GetCreateMob sm;
+
+		GetCreateMob(User,(BYTE*)&sm);
+
+		GridMulticast_OL2(TargetX,TargetY,(BYTE*)&sm,0);
+
+		pUser[User].IsAutoTrading = 0;
+	}
+}

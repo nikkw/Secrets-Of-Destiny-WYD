@@ -1,0 +1,14 @@
+int GetCurKill(int Cid)
+{
+	//0x004014F1
+	
+	if(Cid <= 0 || Cid >= 100)
+	    return;
+
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	int LOCAL_1 = player->Inventory[63].EFV1,
+		LOCAL_2 = LOCAL_1 & 0xFF;
+
+	return LOCAL_2;
+}

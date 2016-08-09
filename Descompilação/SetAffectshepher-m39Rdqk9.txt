@@ -1,0 +1,43 @@
+
+int SetAffect(int clientId, int skillId, int delay, int level)
+{
+	stCharacter *spw = &Spawn[clientId].Character;
+
+	int tickType = SkillData[skillId].AffectType;
+	int skillType = SkillData[skillId].Aggressive; // LOCAL2
+
+	if(spw->AffectInfo.Resist && skillType != 0)
+		return 0;
+	
+	int affectId = GetEmptyAffect(clientId, tickType);//LOCAL_3
+	if(tickType <= 0 || (affectId < 0 && affectId >= MAX_AFFECT))
+		return 0;
+
+	int local4 = spw->Game.Affect[affectId].Index;
+
+	spw->Game.Affect[affectId].Index = tickType;
+	spw->Game.Affect[affectId].Master = SkillData[skillId].AffectValue;
+	
+	int time = SkillData[skillId].Time * (delay) / 100;
+
+	if(local4 == tickType)
+		if(time > spw->Game.Affect[affectId].Time)
+			spw->Game.Affect[affectId].Time = time;
+		else NULL;
+	else
+		spw->Game.Affect[affectId].Time = time;
+
+	if(local4 == tickType)
+		if(level > spw->Game.Affect[affectId].Value)
+			spw->Game.Affect[affectId].Value = level;
+		else NULL;
+	else
+		spw->Game.Affect[affectId].Value = level;
+
+	if(delay >= 10000)
+		spw->Game.Affect[affectId].Time = 10000;
+
+	GetCurrentScore(clientId);
+
+	return 1;
+}

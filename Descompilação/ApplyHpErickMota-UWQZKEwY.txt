@@ -1,0 +1,26 @@
+int ApplyHp(int Cid)
+{
+	//0x00401253
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	if(Users[Cid].Potion.CountHP > player->Status.maxHP)
+		Users[Cid].Potion.CountHP = player->Status.maxHP;
+	
+	int LOCAL_1 = player->Status.curHP,
+		LOCAL_2 = Users[Cid].Potion.CountHP;
+
+	if(LOCAL_2 <= LOCAL_1)
+	{
+		// eax = player->Status.Level
+		int LOCAL_3 = player->Status.Level + 50;
+		
+		player->Status.curHP += LOCAL_3;
+		
+		if(player->Status.curHP > LOCAL_2)
+			player->Status.curHP = LOCAL_2;
+		
+		return 1;
+	}
+	
+	return -1;
+}

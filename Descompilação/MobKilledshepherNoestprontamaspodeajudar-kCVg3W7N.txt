@@ -1,0 +1,506 @@
+// Isto é o que fiz até agora da MobKilled...
+// Pode te ajudar aê ErickMotoca
+int BASE_MobKilled(int arg1, int arg2, int arg3, int arg4)
+{
+	static int TESTSERVER; // 1.2  0758fad4
+	static int g_pNextLevel[400];
+	static int CastleState = 0x758FB14;// 1.2 - 1.7  = 8BF1860
+	static int DEADPOINT; //4C7BA8 1.2
+	static char temp[1024]; // 1.2 - 751C928
+	static unsigned short* g_pGuildWar;
+	static int g_pNextLevel[400];
+
+	if(arg1 <= 0 || arg1 >= 30000)
+		return;
+
+	if(arg2 <= 0 || arg2 >= 30000)
+		return;
+
+	if(CMob[arg1].Mode == 0)
+		return;
+
+	// 0045AB5D
+	st_Item *LOCAL_1 = &CMob[arg1].Equip[13];
+	if(LOCAL_1->Index == 769)
+	{
+		INT32 LOCAL_2 = BASE_GetItemSanc(LOCAL_1);
+		if(LOCAL_2 <= 0)
+			BASE_ClearItem(LOCAL_1);
+		else
+		{
+			LOCAL_2 = LOCAL_2 - 1;
+			if(LOCAL_1->Effect[0].Index == 43)
+				LOCAL_1->Effect[0].Value = LOCAL_2;
+			else if(LOCAL_1->Effect[1].Index == 43)
+				LOCAL_1->Effect[1].Value = LOCAL_2;
+			else if(LOCAL_1->Effect[2].Index == 43)
+				LOCAL_1->Effect[2].Value = LOCAL_2;
+		}
+
+		if(arg1 > 0 && arg1 < MAX_PLAYER)
+		{
+			SendItem(arg1, 0, 13, LOCAL_1);
+
+			SendEmotion(arg1, 14, 2);
+		}
+		
+		SendEquip(arg1, 0);
+
+		CMob[arg1].Status.curHP = CMob[arg1].Status.maxHP;
+		if(arg1 < MAX_PLAYER)
+			SetReqHp(arg1);
+			
+		SendScore(arg1);
+		return;
+	}
+
+	if(CastleState > 1 && CMob[arg1].Target.X == 1046 && CMob[arg1].Target.Y == 1690 && arg1 > 0 && arg1 < MAX_PLAYER)
+	{
+		Teleportar(arg1, 1057, 1742);
+		return;
+	}
+
+	INT32 LOCAL_3 = CMob[arg2].Equip[0].Index;
+
+	if(arg2 >= MAX_PLAYER && CMob[arg2].CapeInfo == 4 && LOCAL_3 >= 315 && LOCAL_3 <= 345 && arg1 > 100 && CMob[arg1].CapeInfo != 4)
+	{
+		INT32 LOCAL_4 = CMob[arg2].Summoner;
+
+		if(LOCAL_4 > 0 && LOCAL_4 < MAX_PLAYER && Users[LOCAL_4].Status != 0 && CMob[LOCAL_4].Mode != 0)
+		{
+			st_Item *LOCAL_5 = &CMob[LOCAL_4].Equip[14];
+
+			if(LOCAL_5->Index >= 2330 && LOCAL_5->Index < 2360)
+			{
+				char LOCAL_6 = LOCAL_5->Effect[1].Index; // EBP - 18h
+				char LOCAL_7 = LOCAL_5->Effect[2].Value; // EBP - 1Ch
+				char LOCAL_8 = LOCAL_6 + 100; // EBP - 20h
+
+				if(LOCAL_5->Index == 2330)
+					LOCAL_8 = LOCAL_6 + 25;
+				else if(LOCAL_5->Index == 2331)
+					LOCAL_8 = LOCAL_6 + 50;
+
+				if(LOCAL_6 < CMob[arg1].Status.Level && LOCAL_6 < 100)
+				{
+					LOCAL_7 = LOCAL_7 + 1;
+
+					if(LOCAL_7 >= LOCAL_8)
+					{
+						LOCAL_7 = 1;
+						LOCAL_6 = LOCAL_6 + 1;
+
+						LOCAL_5->Effect[2].Value = LOCAL_7;
+						LOCAL_5->Effect[1].Index = LOCAL_6;
+
+						SendClientMsg(LOCAL_4, "Sua montaria subiu de level");
+
+						SendItem(LOCAL_4, 0, 13, &CMob[LOCAL_4].Equip[14]);
+						MountProcess(LOCAL_4, 0);
+					}
+					else
+					{
+						LOCAL_5->Effect[2].Value = LOCAL_7;
+						SendItem(LOCAL_4, 0, 13, &CMob[LOCAL_4].Equip[14]);
+					}
+				}
+			}
+		}
+	}
+
+	// 0045AF04
+	p338 LOCAL_13;
+	LOCAL_13.Header.PacketId = 0x338;
+	LOCAL_13.Header.Size = sizeof p338; // 0x14
+	LOCAL_13.Header.ClientId = 30000;
+
+	LOCAL_13.Unknow1 = arg1;
+	LOCAL_13.killed = arg2;
+
+	CMob[arg1].Status.curHP = 0;
+
+	INT32 LOCAL_14 = CMob[arg2].Leader;
+	if(LOCAL_14 == 0)
+		LOCAL_14 = arg2;
+
+	// 45AF56
+
+	if(arg2 >= MAX_PLAYER && CMob[arg2].CapeInfo == 4)
+	{
+		INT32 LOCAL_15 = CMob[arg2].Summoner;
+
+		if(LOCAL_15 <= 0 || LOCAL_15 >= MAX_PLAYER || Users[LOCAL_15].Status != 22)
+		{
+			GridMulticast_2(CMob[arg1].Target.X, CMob[arg1].Target.Y, &LOCAL_13, 0);
+
+			if(arg1 > 100)
+				DeleteMob(arg1, 1);
+
+			return;
+		}
+		else
+			arg2 = LOCAL_15;
+	}
+
+	if(arg1 < MAX_PLAYER && CMob[arg1].bStatus.Level <= 359)
+	{
+		INT32 LOCAL_16 = CMob[arg1].bStatus.Level;
+
+		if(LOCAL_16 < 0 || LOCAL_16 >= 355)
+			return;
+
+		INT32 LOCAL_17 = g_pNextLevel[LOCAL_16];
+		INT32 LOCAL_18 = g_pNextLevel[LOCAL_16 + 1];
+
+		INT32 LOCAL_19 = LOCAL_18 - LOCAL_17;
+
+		INT32 LOCAL_20 = LOCAL_19 / 20;
+
+		if(LOCAL_16 >= 30)
+			LOCAL_20 = LOCAL_19 / 22;
+		
+		if(LOCAL_16 >= 40)
+			LOCAL_20 = LOCAL_19 / 25;
+
+		if(LOCAL_16 >= 50)
+			LOCAL_20 = LOCAL_19 / 30;
+
+		if(LOCAL_16 >= 60)
+			LOCAL_20 = LOCAL_19 / 35;
+
+		if(LOCAL_16 >= 70)
+			LOCAL_20 = LOCAL_19 / 40;
+
+		if(LOCAL_16 >= 80)
+			LOCAL_20 = LOCAL_19 / 45;
+
+		if(LOCAL_16 >= 90)
+			LOCAL_20 = LOCAL_19 / 50;
+
+		if(LOCAL_16 >= 100)
+			LOCAL_20 = LOCAL_19 / 55;
+
+		if(LOCAL_16 >= 150)
+			LOCAL_20 = LOCAL_19 / 70;
+
+		if(LOCAL_16 >= 200)
+			LOCAL_20 = LOCAL_19 / 85;
+
+		if(LOCAL_16 >= 250)
+			LOCAL_20 = LOCAL_19 / 100;
+
+		// 0045B154
+		if(LOCAL_20 < 0)
+			LOCAL_20 = 0;
+
+		if(LOCAL_20 > 30000)
+			LOCAL_20 = 30000;
+
+		INT32 LOCAL_21 = GetCurKill(arg2);
+		INT32 LOCAL_22 = GetTotKill(arg2);
+		INT32 LOCAL_23 = GetPKPoint(arg2);
+		INT32 LOCAL_24 = GetPKPoint(arg1);
+		INT32 LOCAL_25 = GetGuilty(arg1);
+		INT32 LOCAL_26 = GetCurKill(arg1);
+		
+		INT32 LOCAL_27 = CMob[arg1].CapeInfo;
+		INT32 LOCAL_28 = CMob[arg1].CapeInfo; 
+
+		INT32 LOCAL_29 = 0;
+		INT32 LOCAL_30 = 0;
+
+		if(LOCAL_24 <= 0)
+			LOCAL_20 = LOCAL_20 * 5;
+		else if(LOCAL_24 <= 25)
+			LOCAL_20 = LOCAL_20 * 3;
+
+		INT32 LOCAL_31 = CMob[arg1].Target.X >> 7;
+		INT32 LOCAL_32 = CMob[arg1].Target.Y >> 7;
+
+		if(arg2 < MAX_PLAYER)
+		{
+			if(TESTSERVER != 0)
+				LOCAL_20 = LOCAL_20 / 3;
+			else
+				LOCAL_20 = LOCAL_20 / 6;
+
+			if((LOCAL_27 == 7 && LOCAL_28 == 8) || (LOCAL_27 == 8 && LOCAL_28 == 7))
+				LOCAL_29 = 1;
+
+			INT32 LOCAL_33 = CMob[arg1].GuildIndex;
+			INT32 LOCAL_34 = CMob[arg2].GuildIndex;
+
+			INT32 LOCAL_35 = 65536;
+
+			if(LOCAL_33 > 0 && LOCAL_33 < LOCAL_35 && LOCAL_34 > 0 && LOCAL_34 < LOCAL_35 && g_pGuildWar[LOCAL_33] == LOCAL_34 && g_pGuildWar[LOCAL_34] == LOCAL_33)
+				LOCAL_30 = 1;
+
+			if(CastleState != 0 && LOCAL_31 == 8 && LOCAL_32 == 13)
+				LOCAL_30 = 1;
+
+			GridMulticast_2(CMob[arg1].Target.X, CMob[arg1].Target.Y, &LOCAL_13, 0);
+
+			INT32 LOCAL_36 = BASE_GetArena(CMob[arg1].Target.X, CMob[arg1].Target.Y);
+			INT32 LOCAL_37 = BASE_GetVillage(CMob[arg1].Target.X, CMob[arg1].Target.Y);
+
+			INT32 LOCAL_38 = 0;
+
+			if(LOCAL_31 == 0 && LOCAL_32 == 31)
+				LOCAL_38 = 1;
+
+			if(LOCAL_36 == 5 && LOCAL_37 == 5 && LOCAL_38 == 0)
+			{
+				if(TESTSERVER != 0)
+					LOCAL_20 = LOCAL_20 >> 2;
+
+				if(LOCAL_29 != 0)
+					LOCAL_20 = LOCAL_20 + ((LOCAL_20 * LOCAL_26) >> 2);
+
+				if(LOCAL_20 > 150000)
+					LOCAL_20 = 150000;
+
+				if(LOCAL_20 < 0)
+					LOCAL_20 = 0;
+
+				// 0045B47B
+				if(LOCAL_16	>= 20)
+				{
+					if(arg2 < MAX_PLAYER)
+						CMob[arg1].Exp = CMob[arg1].Exp - LOCAL_20;
+					else if(DEADPOINT != 0)
+						CMob[arg1].Exp = CMob[arg1].Exp - LOCAL_20;
+
+					if(CMob[arg1].Exp < 0)
+						CMob[arg1].Exp = 0;
+
+					if(DEADPOINT != 0 || arg2 < 100)
+					{
+						sprintf(temp, "Você perdeu %d de experiência", LOCAL_20);
+						SendClientMessage(arg1, temp);
+
+						SendEtc(arg1);
+					}
+				}
+				else
+					SendClientMessage(arg1, "Level abaixo de 20 não perde experiência."); // No caso, MeessageString, ou seilá o nome
+
+				if(LOCAL_29 != 0)
+				{
+					INT32 LOCAL_39 = LOCAL_20 << 1 / 3; // 0045B578
+
+					INT32 LOCAL_40 = CMob[arg1].Status.Level;
+					if(LOCAL_40 < 0)
+						LOCAL_40 = 0;
+
+					if(LOCAL_40 > 300)
+						LOCAL_40 = 300;
+
+					INT32 LOCAL_41 = g_pNextLevel[LOCAL_40];
+					if(CMob[arg1].Exp < LOCAL_41)
+						LOCAL_39 = 0;
+
+					CMob[arg2].Exp = CMob[arg2].Exp + LOCAL_39;
+					if(CMob[arg2].Exp < 0)
+						CMob[arg2].Exp = 0;
+
+					sprintf(temp, "Você ganhou %d de experiência", LOCAL_39); // string table
+					SendClientMessage(arg2, temp);
+
+					SendEtc(arg2); //  45B668
+					
+					SetCurKill(arg2, LOCAL_21 + 1);
+					SetTotKill(arg2, LOCAL_22 + 1);
+
+					if(LOCAL_30 == 0 && LOCAL_25 == 0)
+					{
+						INT32 LOCAL_42 = (-(LOCAL_24 / 20)) * 3;
+
+						if(LOCAL_42 < -9)
+							LOCAL_42 = -9;
+
+						if(LOCAL_42 > 0)
+							LOCAL_42 = 0;
+
+						if(LOCAL_25 > 0)
+							LOCAL_42 = 0;
+
+						LOCAL_23 = LOCAL_23 + LOCAL_42;
+
+						SetPKPoint(arg2, LOCAL_23);
+						sprintf(temp, "CP %d diminuiu em %d", LOCAL_23 - 75, -1);
+
+						SendClientMessage(arg2, temp);
+					}
+				}
+				else if(LOCAL_30 == 0) // 0045B74F
+				{
+					INT32 LOCAL_43 = (-(LOCAL_24 / 25) * 3);
+
+					if(LOCAL_43 < -9)
+						LOCAL_43 = -9;
+
+					if(LOCAL_43 > 0)
+						LOCAL_43 = 0;
+
+					if(LOCAL_25 > 0)
+						LOCAL_43 = 0;
+
+					if(CMob[arg1].Equip[15].Index == 548 || CMob[arg1].Equip[15].Index == 549 || CMob[arg2].Equip[15].Index == 548 || CMob[arg2].Equip[15].Index == 549)
+						LOCAL_43 = LOCAL_43 * 3;
+
+					LOCAL_23 = LOCAL_23 + LOCAL_43;
+
+					SetPKPoint(arg2, LOCAL_23);
+
+					if(LOCAL_43 != 0)
+					{
+						sprintf(temp, "CP %d diminuiu em %d", LOCAL_23 - 75, -LOCAL_43);
+
+						SendClientMessage(arg2, temp);
+					}
+
+					if(LOCAL_24 <= 60)
+					{
+						INT32 LOCAL_44 = (75 - LOCAL_24) / 10;
+						INT32 LOCAL_45 = 0;
+
+						for(INT32 LOCAL_46 = 0; LOCAL_46 < 63; LOCAL_46 ++)
+						{
+							if(Rand() % 5)
+								continue;
+
+							INT32 LOCAL_47 = CMob[arg1].Target.X;
+							INT32 LOCAL_48 = CMob[arg1].Target.Y;
+							
+							st_Item *LOCAL_49 = &CMob[arg1].Inventory[LOCAL_46];
+
+							if(LOCAL_49->Index <= 0 || LOCAL_49->Index > MAX_ITEM)
+								continue;
+
+							if(LOCAL_49->Index == 508 || LOCAL_49 ->Index == 509 || LOCAL_49->Index == 522 || LOCAL_49->Index == 531 || LOCAL_49->Index == 446)
+								continue;
+
+							INT32 LOCAL_50 = Rand() & 0x80000003;
+
+							INT32 LOCAL_51 = CreateItem(LOCAL_47, LOCAL_48, LOCAL_49, 1);
+							if(LOCAL_51 >= 5000 || LOCAL_51 <= 0)
+								continue;
+
+							if(BASE_NeedLog(LOCAL_49, 0))
+							{
+								char LOCAL_59 [32];
+								BASE_GetItemCode(LOCAL_49, LOCAL_59);
+
+								sprintf(temp, "cho %s", LOCAL_59);
+
+//								BASE_Log(temp, Users[arg1].Username, Users[arg1].In_Addr.S_un.S_un_b.s_b1);
+							}
+
+							memset(LOCAL_49, 0, 8);
+							// INICIO DO BUFFER -> EBP - 108h
+							char buffer[28];
+
+							*(WORD*)&buffer[4] = 0x175;
+							*(WORD*)&buffer[0] = 28;
+							*(DWORD*)&buffer[12] = 1;
+							*(DWORD*)&buffer[16] = LOCAL_46;
+							*(DWORD*)&buffer[20] = LOCAL_50;
+							*(WORD*)&buffer[24] = LOCAL_47;
+							*(WORD*)&buffer[28] = LOCAL_48;
+
+							_SendOneMessage(buffer, *(WORD*)&buffer[0]);
+							
+							LOCAL_45 = LOCAL_45 + 1;
+							if(!Rand() & 0x80000001)
+								break;
+
+							if(LOCAL_45 >= LOCAL_44)
+								break;
+						}
+					}
+					
+					if(LOCAL_24 <= 35)
+					{
+						INT32 LOCAL_67 = (LOCAL_24 + 10) / 10;
+
+						if(LOCAL_67 <= 0)
+							LOCAL_67 = 1;
+
+						INT32 LOCAL_68 = Rand() % LOCAL_67;
+						//0045BB71
+						INT32 LOCAL_69;
+						// Não entendi direito essa parte, tá muito confuso
+						while(!LOCAL_68)
+						{ 
+							LOCAL_69 = Rand() % 14 + 1;
+							if(LOCAL_69 != 12)
+							{
+								INT32 LOCAL_70 = CMob[arg1].Target.X;
+								INT32 LOCAL_71 = CMob[arg1].Target.Y;
+
+								st_Item *LOCAL_72 = &CMob[arg1].Equip[LOCAL_69];
+								if(LOCAL_72->Index <= 0  || LOCAL_72->Index > MAX_ITEM)
+									break;
+								
+								if(LOCAL_72->Index == 508 || LOCAL_72->Index == 509 || LOCAL_72->Index == 522 || LOCAL_72->Index == 531 || LOCAL_72->Index == 446)
+									break;
+
+								INT32 LOCAL_73 = Rand() & 0x80000003;
+
+								INT32 LOCAL_74 = CreateItem(LOCAL_70, LOCAL_71, LOCAL_72, 1);
+								if(LOCAL_74 >= 5000 || LOCAL_74 <= 0)
+									break;
+
+								if(BASE_NeedLog(LOCAL_72, 0))
+								{
+									char LOCAL_82 [32];
+									BASE_GetItemCode(LOCAL_72, LOCAL_82);
+
+									sprintf(temp, "cho %s", LOCAL_82);
+
+	//								BASE_Log(temp, Users[arg1].Username, Users[arg1].In_Addr.S_un.S_un_b.s_b1);
+								}
+								char buffer[28];
+
+								*(WORD*)&buffer[4] = 0x175;
+								*(WORD*)&buffer[0] = 28;
+								*(DWORD*)&buffer[12] = 0;
+								*(DWORD*)&buffer[16] = LOCAL_69;
+								*(DWORD*)&buffer[20] = LOCAL_73;
+								*(WORD*)&buffer[24] = LOCAL_70;
+								*(WORD*)&buffer[28] = LOCAL_71;
+
+								_SendOneMessage(buffer, *(WORD*)&buffer[0]);
+							}
+						}
+					}
+					
+					p613_GetCreateMob LOCAL_116;
+					GetCreateMob(arg2, &LOCAL_116);
+
+					GridMulticast_2(CMob[arg2].Target.X, CMob[arg2].Target.Y, &LOCAL_116, 0);
+
+					if(LOCAL_29 != 0)
+						SetCurKill(arg1, 0);
+								
+					if(LOCAL_24 < 75 && LOCAL_30 == 0 && arg2 < MAX_PLAYER)
+					{
+						LOCAL_24 = LOCAL_24 + 1;
+
+						SetPKPoint(arg1, LOCAL_24);
+						// 0045BE65
+
+						sprintf(temp, "CP %d aumentou em %d.", LOCAL_24 - 75, 1);
+						SendClientMessage(arg1, temp);
+					}
+					
+					GetCreateMob(arg1, &LOCAL_116);
+
+					GridMulticast_2(CMob[arg1].Target.X, CMob[arg1].Target.Y, &LOCAL_116, 0);
+
+					INT32 
+				}
+			}
+		}
+	}
+}

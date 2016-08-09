@@ -1,0 +1,43 @@
+void BASE_SortTradeItem(STRUCT_ITEM* Item, int Type) // 004099c0 - terminar
+{
+	int TradeBuffer[MAX_TRADE];
+	memset(TradeBuffer, -1, MAX_TRADE);
+
+	int i;
+	for(i = 0; i < MAX_TRADE; i++)
+	{
+		if(Item[i].Index == 0)
+		{
+			TradeBuffer[i] = -1;
+			continue;
+		}
+
+		TradeBuffer[i] = BASE_GetItemAbility(&Item[i], Type);
+	}
+
+	int InvBuffer[MAX_INVEN];
+	memset(InvBuffer, 0, MAX_INVEN);
+
+	for(i = 0; i < MAX_TRADE; i++)
+	{
+		int Next = 0;
+		int Now = -1;
+		for(int j = 0; j < MAX_TRADE; j++)
+		{
+			if(TradeBuffer[j] <= Now)
+				continue;
+
+			Next = j;
+			Now = TradeBuffer[j];
+		}
+
+		if(Now == -1)
+			break;
+
+		TradeBuffer[Next] = -1;
+		//00409ABF
+
+	}
+
+	memcpy(Item, InvBuffer, MAX_INVEN);
+}

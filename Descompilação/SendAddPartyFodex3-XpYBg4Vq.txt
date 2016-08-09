@@ -1,0 +1,36 @@
+void SendAddParty_(int target,int whom,char pos)
+{    
+	char msg[40];
+
+	if(target <= 0 || target >= MAX_PLAYER)
+		return;
+
+	if(pUser[target].Status == 22)
+	{
+		if(pUser[target].Service.Sock <= 0)
+			return;
+
+		*(WORD*) msg = 40;
+		*(WORD*)&msg[6] = 30000;
+		*(WORD*)&msg[4] = 0x37D;
+		
+
+		*(WORD*)&msg[20] = whom;
+
+		*(BYTE*)&msg[12] = pMob[whom].ClassInfo;
+
+		*(WORD*)&msg[14] = pMob[whom].Status.Level;
+
+		*(WORD*)&msg[16] = pMob[whom].Status.maxHP;
+		*(WORD*)&msg[18] = pMob[whom].Status.curHP;
+
+		*(BYTE*)&msg[13] = pos;
+
+		strcpy((char*)&msg[22],pMob[whom].Name);
+
+		int ret = pUser[target].cSock.AddMessage(msg, 40);
+
+		if(ret == 0)
+			CloseUser_OL2(target);
+	}
+}

@@ -1,0 +1,10 @@
+void BASE_ClearItem(STRUCT_ITEM* item) //00408f30 - ok
+{
+	item->Index = 0;
+	item->EF1 = 0;
+	item->EFV1 = 0;
+	item->EF2 = 0;
+	item->EFV2 = 0;
+	item->EF3 = 0;
+	item->EFV3 = 0;
+}

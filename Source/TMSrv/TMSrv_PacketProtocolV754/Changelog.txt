@@ -1,0 +1,190 @@
+[Wars Destiny Release v753]
+	- ErickMota
+
+Legenda (by Supernov4): 
+	[+] Adicionado			[-] Removido		[x] Log finalizado
+	[*] Arrumado			[!] Mudado			[#] Comentário
+
+[11/06/2013]
+    [#] Projeto iniciado
+	[!] PacketControl mudado para um mais funcional
+	[+] Correção de vários sizes para evitar crash's
+	[+] Hook na função ProcessMinTimer para fazer funções de tempo em tempo
+	[+] Hook na função GetCurrentScore para dar bônus e coisas do tipo
+	[!] Buffer da CUser agora dentro da dll
+	[+] Logs nativos removidos
+	[*] Limite de crítico agora indo até 102%
+	[-] Crash da divisão por 0
+	[+] Skill spectral
+	[-] Função nativa CheckPacket
+	[-] BackDoor nativo removido
+	[*] Capas que não davam tinham função agora tem
+	[+] Trava no mg e no crítico, evitando valores negativos
+	[+] Trava no HP,MP,Dano e Def em 32000, evitando que ultrapassem o limite e buguem
+	[+] Limpeza do console todo minuto
+	[+] Exibição dos packets recebidos e enviados no console
+	[*] Skill passíva Visão de Caçadora agora funcional
+	[*] Skill passíva Pericia de Caçador agora funcional
+	[*] Skill passíva Agressividade agora funcional
+	[*] Skill passíva Armadura Elemental agora funcional
+	[*] Skill passíva Escudo do Tormento agora funcional
+	[*] Skill passíva Armadura Crítica agora funcional
+	[*] Skill passíva Noção de Combate agora funcional
+	[*] Skill passíva Mestre das Armas agora funcional
+	[*] Dano concedido por refinações acima de +10 agora corrigido
+	[+] Leitura do DonateList.txt
+	[+] Leitura do ResetList.txt
+	[+] Reset das áreas definidas no ResetList.txt feito
+	[+] Leitura do MessageList.txt
+	[+] Envio das mensagens de acordo com o tempo definido no MessageList.txt
+	[!] Mensagem exibida após apertar insert editada
+	[x]
+[12/06/2013]
+    [+] Criação do buffer "wdBuffer", nele ficarão todas as infos de contas e personagens adicionais que precisarmos
+	[+] Save do buffer acima a cada 24 segundos, para evitar perda de informação
+	[+] Save do buffer acima sempre que o usuário deslogar, para evitar perda de informação
+	[+] Load do buffer acima no packet 0x20D (request login)
+	[+] Trava de conexões em 95, para evitar quedas do servidor ao atingir o máximo de 100 conexões
+	[*] Somente possível comprar uma oitava skill por personagem agora
+	[*] Trava para STR INT CON DEX não passarem de 32000
+	[+] Agora personagens com mais de 200 pontos para distribuir, distribuem 100 com um só clique (falta atualizar os stats(mp hp etc))
+	[*] Celestiais agora podem comprar skills em qualquer level
+	[*] Rações corrigidas via hook, todas funcionando no "V"
+	[+] Controle de exp adicionado
+	[+] Double automático nos fins de semana ativado
+	[+] Bônus de exp para personagens vip de acordo com o tipo de vip (Simples 30%, Plus 40%)
+	[+] Limite de buffs adicionado
+	[x]
+[13/06/2013]
+    [+] Hooks do controle de ataque feitos
+	[+] Controle de mana server side feito 
+	[x]
+[15/06/2013]
+    [+] Controle de mana client side feito 
+	[*] Oitava skill de ht Tempestade de Raios 
+	[x]
+[17/06/2013]
+    [*] Correção na distribuição de pontos de aprendizagem
+    [*] Correção na trava de pontos de status 
+	[x]
+[18/06/2013]
+    [+] Ahack contra speed adicionado
+	[+] Ahack contra clientids alterados feito
+	[*] Correção no packet 0x110
+	[*] Correção no packet 0x112
+	[*] Correção na Skill Escudo Dourado que não removia gold
+	[x]
+[19/06/2013]
+    [+] Adição da dll de edições no client
+	[*] Edição no calculo de dano em mobs da Skill Tempestade de Raios
+	[+] Bônus do frango feito, falta sua ativação
+	[+] Skill sephira Vinhas feita (falta adicionar o mob das vinhas na pasta npc)
+	[*] Bug das evocs corrigido
+	[x]
+[20/06/2013]
+    [+] Adicionado hook de controle do StatusPoint
+	[+] Adicionado hook de controle de SkillPoint
+	[x]
+[21/06/2013]
+    [+] Anti skill hack feito
+	[+] Hook de controle das evocs (para criar novas evocs/varias de uma (falta fazer a função das várias evocs))
+	[x]
+[22/06/2013]
+    [+] Bônus de pontos para celes que tiverem feito as quests dos cristais feito
+	[+] Bônus de pontos para celes de acordo com o level em que seu cele foi feito pronto
+	[+] Bônus de pontos para celes/subs de acordo com o level do outro
+	[+] Bônus de pontos para arch de acordo com o level do mortal que o criou (possibilitando criação de arch em level aleatorio acima de 300)
+	[*] Crash ao enviar packet 0x374 editado removido
+	[+] Hook base para controle do rei adicionado
+	[x]
+[23/06/2013]
+    [+] Sistema de criação de Arch a partir do level 300 feito na tm, falta a parte da db
+	[+] Parte da db feita
+	[x]
+[24/06/2013]
+    [+] Hook de controle de level up feito
+	[+] Celestiais e subs agora upando somente até o level 200
+	[+] Mortais e Archs agora upando até o level 400
+	[+] Criação de imortalidade e ideal feita pelo rei
+	[x]
+[25/06/2013]
+    [+] Block para level 41 e 91 de celes e subs
+	[+] Block para leveis 355 e 370 do arch
+	[+] Diminuição de exp de acordo com a classe
+	[+] Proteção no comando /gm, para utilizá-lo é necessário usar o comando de desbloqueio do mesmo
+	[+] Comando de desbloqueio do /gm feito
+	[+] Composição de Secretas pelo Odin feita
+	[+] Diminuição de exp pelo level do celestial feito, igual br
+	[+] Bônus do bau de exp feito
+	[+] Correção de onde personagens mortais abaixo do level 35 nascem
+	[+] Hook de MobEventDead feito, Chamado toda vez que algum personagem/npc morre
+	[x]
+[27/06/2013]
+    [+] Adicionado função de SaveAccount no process_dettach da dll, quando fecharmos o servidor para manutenção dados não serão perdidos.
+	[+] Configuração da soul para mortais e celestiais+ pela Ehre feita
+	[+] Bônus da soul na getcurrentscore feito, falta a ativação pelo UseSkill
+    [x]
+[28/06/2013] 
+    [+] Composição de sephirots feita pelos npcs de skill
+	[+] Refinação de Abençoadas pela Ehre para celestiais e subs igual o br feita
+	[+] Refinação de itens +12~15 pelo odin (considerando refinação do item, refinação individual de cada abençoada e também se é vip ou não (bônus de 20% para usuários vip.))
+	[+] Exibição no console do ip de toda account que fizer login 
+	[*] Correções no packet de ataque
+	[*] Correção na composição de sephirot, havia um erro ao gerar o id do item
+	[+] Comando /clearinv feito
+	[x]
+[02/07/2013] 
+    [+] Hold ao user as skill's cura e recuperar retirado
+	[+] Hook de controle de itens dropados feito
+	[*] Dano mágico de TK agora aumentando pela inteligência
+	[*] Refinação Máxima da nyerds agora é 9
+	[*] Montaria não morre mais com o personagem
+	[*] Level máximo da montaria agora é 120
+	[x]
+[06/07/2013]
+    [+] Ailyn feita
+	[+] Replations feitas (todas)
+	[+] Status das montarias corrigidos
+	[+] Agatha feita
+	[+] Hook de controle da deleção de personagens
+	[x]
+[07/07/2013]
+    [+] Bloqueio para não deletarem personagem usando coroa
+	[+] Comando /tab
+	[+] Barras e moedas de gold feitas
+	[x]
+[08/07/2013]
+    [+] Itens de agrupar e desagrupar poeiras feito
+	[+] Pergaminhos de caça feitos
+	[+] Money Cube feito
+	[x]
+[11/07/2013]
+    [+] Livros de Skill Sephira feitos
+	[+] Block para refinação de capa celestial feito
+	[*] Correção no BuyItem
+	[+] Kibita agora entrega Soul
+	[+] Criação de contas ao logar
+	[+] Gemas de anct feitas
+	[+] Evento de drops feito, semelhante ao da tmsrv, porém todo feito pela dll e com o drop indo para o inventário
+	[x]
+[16/07/2013]
+    [+] Filtro de drop feito, faltam comandos de ativação do sistema de autodrop
+	[+] Comandos para a ativação do filtro de drop feitos
+	[x]
+[19/07/2013]
+    [*] Life de montarias como o sleipnir corrigidos, agora não morrem mais instantaneamente
+	[+] Controle de permissão para equipar equipamentos
+	[+] Barras de Mithril
+	[x]
+[21/07/2013]
+    [*] Bloqueio para Poeira de Ori não refinar itens celestiais
+	[+] Feijões e Removedor de tinturas feito
+	[x]
+[12/08/2013]
+    [*] Bloqueio de venda de cytheras hc nos npcs
+	[*] Bloqueio de compra de itens em lojas quando se tem mais de 2Bi no cargo
+	[x]
+[16/08/2013]
+    [+] Proteção contra ClientIds editados adicionada em várias funções
+	[+] Criação da Thread MainThread, rodando de 1 em 1 segundo (usar para não sobrecarregar a ProcessMinTimer)
+	[+] Função base do Donate feita, falta testar

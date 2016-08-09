@@ -1,0 +1,36 @@
+// Talvez tenha sofrido adaptação, mas creio que não
+
+int SetTick(int clientId, int skillId, int delay, int level)
+{
+	stCharacter *spw = &Spawn[clientId].Character;
+	if(spw->Info.Merchant == 1 && clientId > MAX_PLAYER)
+		return false;
+
+	INT32 LOCAL_1 = SkillData[skillId].TickType;
+	INT32 LOCAL_2 = SkillData[skillId].Aggressive;
+
+	if(spw->AffectInfo.Resist && LOCAL_2 != 0)
+		return false;
+
+	INT32 LOCAL_3 = GetEmptyAffect(clientId, LOCAL_1);
+
+	if(LOCAL_1 > 0 && LOCAL_3 >= 0 && LOCAL_3 < MAX_AFFECT)
+	{
+		stAffect *affect = spw->Game.Affect;
+
+		affect[LOCAL_3].Index = LOCAL_1;
+		affect[LOCAL_3].Master = SkillData[skillId].TickValue;
+
+		affect[LOCAL_3].Time = (delay * SkillData[skillId].Time) / 100;
+
+		if(delay >= 10000)
+			affect[LOCAL_3].Time = 10000;
+
+		affect[LOCAL_3].Value = level;
+
+		GetCurrentScore(clientId);
+		return true;
+	}
+
+	return false;
+}

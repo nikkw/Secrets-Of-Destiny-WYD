@@ -1,0 +1,91 @@
+int BASE_GetSkillDamage(int SkillNum, STRUCT_MOB* mob, int weather, int weapondamage) //0040F180 - ok - atualizada(reconhece evolucao)
+{
+	int SkillInstanceType = g_pSpell[SkillNum].InstanceType;
+	int SkillMaster = ((SkillNum % 24) >> 3) + 1;
+	int Level = mob->CurrentScore.Level;
+	if(Level < 0)
+		Level = 0;
+
+	if(mob->MobType == MORTAL || mob->MobType == ARCH)
+	{
+		if(Level >= MAX_LEVELMA)
+			Level = MAX_LEVELMA;
+	}
+	else
+	{
+		if(Level >= MAX_LEVELCSH)
+			Level = MAX_LEVELCSH;
+	}
+
+	int MobAprend = mob->CurrentScore.Master[SkillMaster];
+	int SkillInstanceValue = g_pSpell[SkillNum].InstanceValue;
+	int SkillAffectValue = g_pSpell[SkillNum].AffectValue;
+	int calcSkillDmg = 0;
+
+	if(SkillInstanceType == 0)
+	{
+		if(SkillNum == 11)
+			calcSkillDmg = (MobAprend / 10) + SkillAffectValue;
+		if(SkillNum == 13)
+			calcSkillDmg = ((MobAprend * 3) >> 2) + SkillAffectValue;
+		if(SkillNum == 41)
+			calcSkillDmg = (MobAprend / 25) + 2;
+		if(SkillNum == 43)
+			calcSkillDmg = (MobAprend / 3) + SkillAffectValue;
+		if(SkillNum == 44)
+			calcSkillDmg = ((((MobAprend * 3) / 20) + SkillAffectValue) << 1);
+		if(SkillNum == 45)
+			calcSkillDmg = (MobAprend / 10) + SkillAffectValue;
+
+		return calcSkillDmg;
+	}
+	if(SkillInstanceType >= 1 && SkillInstanceType <= 5)
+	{
+		int calcSkillNum = SkillNum >> 3;
+		if(SkillNum == 97)
+			calcSkillDmg = (Level * 15) + SkillInstanceValue;
+		else if(!mob->ClassInfo && calcSkillNum == 1)
+			calcSkillDmg = (SkillInstanceValue + MobAprend + (Level >> 1) + (mob->CurrentScore.Attack >> 1) + (weapondamage * 3));
+		else if(!mob->ClassInfo && calcSkillNum != 1)
+			calcSkillDmg = ((SkillInstanceValue + MobAprend) + ((Level >> 1) + weapondamage + (mob->CurrentScore.STR >> 2)));
+		else if(mob->ClassInfo == 1 || mob->ClassInfo == 2)
+			calcSkillDmg = (SkillInstanceValue + MobAprend + (Level >> 1) + (mob->CurrentScore.INT / 3)); 
+		else if(mob->ClassInfo == 3)
+			calcSkillDmg = (SkillInstanceValue + MobAprend + (Level >> 1) + (mob->CurrentScore.STR >> 1) + (weapondamage * 3));
+
+		if(weather == 1)
+		{
+			if(SkillInstanceType == 2)
+				calcSkillDmg = calcSkillDmg * 90 / 100;
+			if(SkillInstanceType == 5)
+				calcSkillDmg = calcSkillDmg * 130 / 100;
+		}
+		else if(weather == 2 && SkillInstanceType == 3)
+			calcSkillDmg = calcSkillDmg * 120 / 100;
+
+		if(SkillNum == 97)
+			calcSkillDmg = calcSkillDmg;
+		else if(mob->ClassInfo || calcSkillNum != 1)
+		{
+			if(mob->ClassInfo == 3)
+				calcSkillDmg = ((calcSkillDmg * 5) >> 2);
+			else
+			{
+				calcSkillDmg = ((((mob->MagicIncrement * 2) + 100) * calcSkillDmg) / 100);
+				calcSkillDmg = ((calcSkillDmg * 5) >> 2);
+			}
+		}
+		else 
+			calcSkillDmg = ((calcSkillDmg * 5) >> 2);
+
+		return calcSkillDmg;
+	}
+	else if(SkillInstanceType == 6)
+		calcSkillDmg = (((MobAprend * 3) >> 1) + SkillInstanceValue);
+	else if(SkillInstanceType == 11)
+		calcSkillDmg = SkillInstanceValue;
+	else
+		calcSkillDmg = mob->MagicIncrement;
+
+	return calcSkillDmg;
+}

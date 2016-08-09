@@ -1,0 +1,73 @@
+void BASE_RemoveParty(INT32 Cid)
+{
+ //0x00401366
+
+ st_Mob *player = GetMobFromIndex(Cid);
+
+ int LOCAL_1 = player->Leader;
+
+ if(LOCAL_1 < 0 || LOCAL_1 >= 30000)
+ {
+  //Log("err, RemoveParty but worng leader", Users[Cid].Username);
+     return;
+ }
+
+ if(LOCAL_1 && LOCAL_1 < 750)
+ {
+  if(Users[LOCAL_1].Status != 22)
+  {
+   //Log("err,removeparty - conn mode",
+      //Log("err,removeparty - leader mode",
+   player->Leader = 0;
+   return;
+  }
+ }
+
+ if(Cid > 0 && Cid < 750)
+     SendRemoveParty(Cid, 0);
+
+ if(LOCAL_1)
+ {
+  SendRemoveParty(LOCAL_1, Cid);
+  player->Leader = 0;
+
+  for(int LOCAL_2 = 0; LOCAL_2 < 12; LOCAL_2++)
+  {
+   st_Mob *Leader = GetMobFromIndex(LOCAL_1);
+
+   int LOCAL_3 = Leader->PartyList[LOCAL_2];
+
+   if(!LOCAL_3)
+    continue;
+
+   if(LOCAL_3 == Cid)
+    Leader->PartyList[LOCAL_2] = 0;
+
+   if(LOCAL_3 > 0 && LOCAL_3 < 750)
+    if(Users[LOCAL_3].Status == 22)
+     SendRemoveParty(LOCAL_3, Cid);
+   
+  }
+ }
+ else
+ {
+  for(int LOCAL_4 = 0; LOCAL_4 < 12; LOCAL_4++)
+  {
+   int LOCAL_5 = player->PartyList[LOCAL_4];
+
+   if(LOCAL_5 <= 0 || LOCAL_5 > 30000)
+    continue;
+
+   player->PartyList[LOCAL_4] = 0;
+   
+   st_Mob *Member = GetMobFromIndex(LOCAL_5);
+   Member->Leader = 0;
+
+   if(LOCAL_5 <= 0 || LOCAL_5 >= 750)
+    continue;
+
+   if(Users[LOCAL_5].Status == 22)
+    SendRemoveParty(LOCAL_5, 0);
+  }
+ }
+}

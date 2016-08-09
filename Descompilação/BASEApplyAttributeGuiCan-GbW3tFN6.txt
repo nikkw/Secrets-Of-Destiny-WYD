@@ -1,0 +1,24 @@
+void BASE_ApplyAttribute(char* pHeight, int size) //00405bd0 - ok
+{
+	int calcX;
+	int calcY;
+	int x = g_HeightPosX + size;
+	int y = g_HeightPosY + size;
+	for(int i = g_HeightPosY; i < y; i++)
+	{
+		for(int j = g_HeightPosX; j < x; j++)
+		{
+			calcX = (j >> 2);
+			calcX = calcX & 0x3FF;
+
+			calcY = (i >> 2);
+			calcY = calcY & 0x3FF;
+
+			int Attribute = g_pAttribute[calcX][calcY];
+			if(Attribute == 0)
+				continue;
+
+			pHeight[(((i - g_HeightPosX) * g_HeightWidth) + j) - g_HeightPosY] = 127;
+		}
+	}
+}

@@ -1,0 +1,29 @@
+void BASE_WriteSkillBin() //004060b0 - ok
+{
+	int size = sizeof(STRUCT_SPELL) * MAX_SKILL;
+	char* temp = (char *)g_pSpell;
+
+	int i;
+	for(i = 0; i < size; i++)
+		temp[i] = temp[i] ^ 0x5A;
+
+	FILE* fp = fopen("SkillData.bin", "wb");
+	if(fp != NULL)
+	{
+		fwrite(g_pSpell, sizeof(STRUCT_SPELL), MAX_SKILL, fp);
+		int sum = BASE_GetSum2((char*)g_pSpell, size);
+		int nRand = rand();
+		fwrite(&nRand, sizeof(nRand), 1 , fp);
+		fclose(fp);
+
+		FILE* fpCSum = fopen("..\\SkillCSum.h", "wt");
+		if(fpCSum != NULL)
+		{
+			fprintf(fpCSum, "#define SKILL_CHECKSUM %d", sum);
+			fclose(fp);
+		}
+	}
+
+	for(i = 0; i < size; i++)
+		temp[i] = temp[i] ^ 0x5A;
+}

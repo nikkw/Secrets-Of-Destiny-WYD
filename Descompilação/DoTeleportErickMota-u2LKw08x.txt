@@ -1,0 +1,16 @@
+void DoTeleport(int clientID, int posX, int posY)	
+{
+	//0x004010C8
+	if(!GetEmptyMobGrid(clientID, &posX, &posY))
+		return;
+
+	p366 LOCAL_14;
+	GetAction(clientID, posX, posY, &LOCAL_14);
+
+	LOCAL_14.mType = 1;
+
+	if(clientID < 100)
+		AddMessage(&LOCAL_14, clientID);
+	
+	GridMulticast_OL1(clientID, posX, posY, &LOCAL_14);
+}

@@ -1,0 +1,13 @@
+void SetReqMp(int Cid)
+{
+        //0x00401492
+ 
+        if(Cid <= 0 || Cid >= 100)
+                return;
+ 
+        if(CMob[LOCAL_1].Status.curMP > CMob[LOCAL_1].Status.maxMP)
+                CMob[LOCAL_1].Status.curMP = CMob[LOCAL_1].Status.maxMP;
+ 
+        if(Users[Cid].Potion.CountMp < CMob[LOCAL_1].Status.curMP)
+                Users[Cid].Potion.CountMp = CMob[LOCAL_1].Status.curMP;
+}

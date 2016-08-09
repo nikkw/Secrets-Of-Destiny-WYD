@@ -1,0 +1,9 @@
+int GetIntView(int arg1, int arg2)
+{
+	// 0x004011FE
+	if(cMob[arg1].Target.X >= (cMob[arg2].Target.X - 0x17) && cMob[arg1].Target.X <= (cMob[arg2].Target.X + 0x17)
+	&& cMob[arg1].Target.Y >= (cMob[arg2].Target.Y - 0x17) && cMob[arg1].Target.Y <= (cMob[arg2].Target.Y + 0x17))
+	    return 1;
+
+	return -1;
+}

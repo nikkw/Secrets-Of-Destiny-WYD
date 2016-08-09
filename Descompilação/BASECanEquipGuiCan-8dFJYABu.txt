@@ -1,0 +1,87 @@
+BOOL BASE_CanEquip(STRUCT_ITEM* item, STRUCT_SCORE* score, int Pos, int Class, STRUCT_ITEM* pBaseEquip) //00408fa0 - ok
+{
+	if(item->Index <= 0 && item->Index > MAX_ITEMLIST) // Verifica se o id do item e valido
+		return FALSE;
+
+	int ItemUnique = g_pItemList[item->Index].Unique;
+	if(ItemUnique == CAPE) // Verifica se o client esta tentando trocar a capa
+		return FALSE;
+
+	if(Pos != -1) // Verifica o slot do item
+	{
+		int ItemPos = BASE_GetItemAbility(item, EF_POS);
+		int ItemMov = ((ItemPos >> Pos) & 1);
+		if(ItemMov == 0) // Verifica se pode mover o item para este slot
+			return FALSE;
+
+		if(Pos == WEAPON || Pos == SHIELD) // Slot das armas/escudos
+		{
+			int SrcSlot;
+            if(Pos == WEAPON)
+                SrcSlot = SHIELD;
+            else // Pos = SHIELD
+                SrcSlot = WEAPON;
+
+			short SrcItemID = pBaseEquip[SrcSlot].Index;
+            if(SrcItemID > 0 && SrcItemID < MAX_ITEMLIST) // Verifica o id da outra arma
+            {
+                int SrcUnique = g_pItemList[SrcItemID].Unique;
+				int SrcPos = BASE_GetItemAbility(&pBaseEquip[SrcSlot], EF_POS);
+				
+				if(ItemPos == 64 || SrcPos == 64) // Verifica se a arma usada eh de 2 maos
+                {
+                    if(ItemUnique == 46) // Armas de arremeco
+                    {
+                        if(SrcPos != 128) // A segunda arma esta na mao do escudo
+                            return FALSE;
+                    }
+                    else if(SrcUnique == 46) // Armas de arremeco
+                    {
+                        if(ItemPos != 128) // A segunda arma esta a mao do escudo
+                            return FALSE;
+                    }
+                    else // Outros tipos de armas
+                        return FALSE;
+                }
+
+			}
+		}
+	}
+
+	int ItemClass = BASE_GetItemAbility(item, EF_CLASS);
+	ItemClass = ((ItemClass >> Class) & 1);
+    if(ItemClass == 0)
+        return FALSE; // Classe incompativel
+
+	// Dados do requerimento
+    int ItemReqLevel = BASE_GetItemAbility(item, EF_LEVEL);
+    int ItemReqSTR = BASE_GetItemAbility(item, EF_REQ_STR);
+    int ItemReqINT = BASE_GetItemAbility(item, EF_REQ_INT);
+    int ItemReqDEX = BASE_GetItemAbility(item, EF_REQ_DEX);
+    int ItemReqCON = BASE_GetItemAbility(item, EF_REQ_CON);
+    int ItemWType = BASE_GetItemAbility(item, EF_WTYPE);
+
+	ItemWType = ItemWType % 10;
+	int divItemWType = (ItemWType / 10);
+
+    if(Pos == SHIELD && ItemWType != 0)
+    {
+        int porcDim = 100;
+        if(divItemWType == 0 && ItemWType > 1)
+            porcDim = 130;
+        else if(divItemWType == 6 && ItemWType > 1)
+            porcDim = 150;
+
+        ItemReqLevel = ((ItemReqLevel * porcDim) / 100);
+        ItemReqSTR = ((ItemReqSTR * porcDim) / 100);
+        ItemReqINT = ((ItemReqINT * porcDim) / 100);
+        ItemReqDEX = ((ItemReqDEX * porcDim) / 100);
+        ItemReqCON = ((ItemReqCON * porcDim) / 100);
+    }
+
+	// Verificacao dos atributos do personagem
+    if(ItemReqLevel <= score->Level && ItemReqSTR <= score->STR && ItemReqINT <= score->INT && ItemReqDEX <= score->DEX && ItemReqCON <= score->CON)
+        return TRUE;
+
+	return FALSE;
+}

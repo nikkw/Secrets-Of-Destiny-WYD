@@ -1,0 +1,42 @@
+void CharLogOut(int arg1)
+{
+	// 0x004013B6
+
+	if(cUsers[arg1].Status != 22)
+	{
+		//Log("err,char logout - not user_play", cUsers[arg1].Username, cUsers[arg1].In_Addr);
+		SendClientSignal(arg1, arg1, 0x116); // 0040145B
+		return;
+	}
+
+	if(cUsers[arg1].IsBillConnect || *(DWORD*)0x004CBBA8 == 0) // 0x004CBBA8 = ?
+		SendBilling(arg1, cUsers[arg1].Username, 2, 0);
+	
+	int LOCAL_1 = cUsers[arg].Trade.OtherClientId;
+
+	if(LOCAL_1 > 0 && LOCAL_1 < 750)
+	{
+		if(cUsers[LOCAL_1].Status == 22)
+			if(cUsers[LOCAL_1].Trade.OtherClientId == arg1)
+				RemoveTrade(LOCAL_1);
+	}
+
+	int LOCAL_2 = 0;
+	
+	for(; LOCAL_2 < 5; LOCAL_2++)
+	{
+		if((LOCAL_2 * 4 + *(DWORD*)0x008BF1848) == arg1)
+		    *(DWORD*)0x008BF1848 + (LOCAL_2 * 4) = 0;
+	}
+
+	cUsers[arg1].Status = 0xB;
+
+	SaveChar(arg1, 1);
+	DeleteMob(arg1, 2);
+
+	cMob[arg1].Target.X = cMob[arg1].LastPosition.X;
+	cMob[arg1].Target.Y = cMob[arg1].LastPosition.Y;
+	cMob[arg1].Mode = 0;
+
+	SendClientSignal(arg1, arg1, 0x116);
+}

@@ -1,0 +1,12 @@
+int GetHide(int arg1)
+{
+	//  0x00401505
+	if(arg1 > 0 && arg1 < MAX_PLAYER)
+		if(cMob[arg1].Affects[0].Index == 0x1C ||
+		   cMob[arg1].Affects[1].Index == 0x1C ||
+		   cMob[arg1].Affects[2].Index == 0x1C ||
+		   cMob[arg1].Affects[3].Index == 0x1C)
+		   return 1;
+
+	return -1;
+}

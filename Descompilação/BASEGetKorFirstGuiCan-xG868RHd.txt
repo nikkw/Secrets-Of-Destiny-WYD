@@ -1,0 +1,9 @@
+void BASE_GetKorFirst(int temp, int* a) //00408ed0 - ok
+{ 
+     int word1;
+     int temp1;
+     word1 = (temp >> 10) & 31;
+     word1 = word1 - 1;
+     temp1 = word1;
+     *a = temp1;
+}

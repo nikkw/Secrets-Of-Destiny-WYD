@@ -1,0 +1,184 @@
+int BASE_GetItemAbility(STRUCT_ITEM* item, unsigned char Type) //004036F0 - ok
+{
+	int ret = FALSE;
+	int itemId = item->Index;
+	if(itemId <= 0 && itemId > MAX_ITEMLIST)
+		return ret;
+
+	int itemUnique = g_pItemList[itemId].Unique;
+	int itemPos = g_pItemList[itemId].Pos;
+
+	if(Type == EF_DAMAGEADD || Type == EF_MAGICADD)
+		if(itemUnique < 41 || itemUnique > 50)
+			return ret;
+
+	if(Type == EF_CRITICAL)
+		if(item->EF2 == EF_CRITICAL2 || item->EF3 == EF_CRITICAL2)
+            Type = EF_CRITICAL2;
+
+    if(Type == EF_DAMAGE && itemPos == 32)
+        if(item->EF2 == EF_DAMAGE2 || item->EF3 == EF_DAMAGE2)
+            Type = EF_DAMAGE2;
+
+    if(Type == EF_MPADD)
+        if(item->EF2 == EF_MPADD2 || item->EF3 == EF_MPADD2)
+            Type = EF_MPADD2;
+
+	if(Type == EF_ACADD)
+        if(item->EF2 == EF_ACADD2 || item->EF3 == EF_ACADD2)
+            Type = EF_ACADD2;
+
+    if(Type == EF_LEVEL && itemId >= 2330 && itemId < 2360)
+        ret = (item->EF2 - 1);
+    else if(Type == EF_LEVEL)
+        ret = ret + g_pItemList[itemId].Level;
+
+    if(Type == EF_REQ_STR)
+        ret = ret + g_pItemList[itemId].Str;
+    if(Type == EF_REQ_INT)
+        ret = ret + g_pItemList[itemId].Int;
+    if(Type == EF_REQ_DEX)
+        ret = ret + g_pItemList[itemId].Dex;
+    if(Type == EF_REQ_CON)
+        ret = ret + g_pItemList[itemId].Con;
+
+    if(Type == EF_POS)
+        ret = ret + g_pItemList[itemId].Pos;
+
+	if(Type != EF_INCUBATE)
+    {
+        for(int i = 0; i < 12; i++)
+        {
+			if(g_pItemList[itemId].Effect[i].Index != Type)
+                continue;
+
+            int EffValue = g_pItemList[itemId].Effect[i].Value;
+            if(Type == EF_ATTSPEED && EffValue == 1)
+                EffValue = 10;
+
+            ret = ret + EffValue;
+            break;
+        }
+    }
+
+	if(item->Index >= 2330 && item->Index < 2390)
+    {
+        if(Type == EF_MOUNTHP)
+			return item->EF1;
+
+        if(Type == EF_MOUNTSANC)
+            return item->EF2;
+
+        if(Type == EF_MOUNTLIFE)
+            return item->EFV2;
+
+        if(Type == EF_MOUNTFEED)
+            return item->EF3;
+
+        if(Type == EF_MOUNTKILL)
+            return item->EFV3;
+
+        if(item->Index >= 2360 && item->Index < 2390 && item->EF1 > 0)
+        {
+			int ItemEF2 = item->EF2;
+			int calcMount = item->Index - 2360;
+
+            if(Type == EF_DAMAGE)
+                return (((ItemEF2 + 20) * g_pMountBonus[calcMount][0]) / 100);
+
+            if(Type == EF_MAGIC)
+				return (((ItemEF2 + 15) * g_pMountBonus[calcMount][1]) / 100);
+
+            if(Type == EF_PARRY)
+				return g_pMountBonus[calcMount][2];
+
+			if(Type == EF_RESIST1 || Type == EF_RESIST2 || Type == EF_RESIST3 || Type == EF_RESIST4)
+                return g_pMountBonus[calcMount][3];
+
+            if(Type == EF_RUNSPEED)
+                return g_pMountBonus[calcMount][4];
+        }
+
+        return ret;
+    }
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(item->Effect[i].Index != Type)
+            continue;
+
+		int EffValue = item->Effect[i].Value;
+        if(Type == EF_ATTSPEED && EffValue == 1)
+            EffValue = 10;
+
+        ret = ret + EffValue;
+        break;
+	}
+
+	if(Type == EF_RESIST1 || Type == EF_RESIST2 || Type == EF_RESIST3 || Type == EF_RESIST4)
+    {
+		int i;
+        for(i = 0; i < 12; i++)
+        {
+            if(g_pItemList[itemId].Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + g_pItemList[itemId].Effect[i].Value;
+            break;
+        }
+
+        for(i = 0; i < 3; i++)
+        {
+            if(item->Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + item->Effect[i].Value;
+            break;
+        }
+    }
+
+	int itemSanc = BASE_GetItemSanc(item);
+	if(item->Index <= 40)
+        itemSanc = 0;
+
+	if(itemSanc >= 9 && (itemPos & 0xF00) != 0)
+        itemSanc++;
+
+	if(itemSanc != 0 && Type != EF_GRID && Type != EF_CLASS && Type != EF_POS && Type != EF_WTYPE && Type != EF_RANGE &&
+       Type != EF_LEVEL && Type != EF_REQ_STR && Type != EF_REQ_INT && Type != EF_REQ_DEX && Type != EF_REQ_CON && 
+	   Type != EF_VOLATILE && Type != EF_INCUBATE && Type != EF_INCUDELAY)
+    {
+        if(itemSanc <= 10)
+            ret = (((itemSanc + 10) * ret) / 10);
+        else
+        {
+            static int Power[] = {
+                220, 250, 280, 320, 370
+            };
+
+            int val = Power[itemSanc - 11];
+            ret = ((((ret * 10) * val) / 100) / 10);
+        }
+    }
+
+	if(Type == EF_RUNSPEED)
+    {
+        if(ret >= 3)
+            ret = 2;
+
+		if(ret > 0 && itemSanc >= 9)
+            ret++;
+    }
+
+    if(Type == EF_HWORDGUILD || Type == EF_LWORDGUILD)
+    {
+        int x = ret;
+        ret = x;
+    }
+
+    if(Type == EF_GRID)
+        if(ret < 0 || ret > 7)
+            ret = 0;
+
+	return ret;
+}

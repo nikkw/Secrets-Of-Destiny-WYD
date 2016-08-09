@@ -1,0 +1,59 @@
+void SummonGuild(int arg1, int arg2, int arg3, int arg4, int arg5)
+{
+	//0x004015C8
+
+	int LOCAL_1 = 0;
+
+	if(arg1 <= 0)
+		return;
+
+	int LOCAL_2 = 0;
+
+	for(; LOCAL_2 < 100; LOCAL_2++)
+	{
+		if(pUsers[LOCAL_2].Status != 22)
+			continue;
+
+		if(!pMob[LOCAL_2].Mode)
+			continue;
+
+		if(pMob[LOCAL_2].MOB.GuildIndex != arg1)
+			continue;
+
+		if(arg5 == 0 || arg5 == 1)
+		{
+			int LOCAL_3 = BASE_GetVillage(pMob[LOCAL_2].TargetX, pMob[LOCAL_2].TargetY);
+		    
+			if(LOCAL_3 != arg5)
+				continue;
+		}
+
+		if(arg5 == 2)
+		{
+			if(pMob[LOCAL_2].MOB.CurrentScore.Level >= 150)
+			{
+				SendClientMessage(LOCAL_2, 0x007D8A58);
+				continue;
+			}
+		}
+
+		DoTeleport(LOCAL_2, arg2, arg3);
+
+		LOCAL_1++;
+
+		if(LOCAL_1 == 30)
+		{
+			arg2++;
+			arg3++;
+		}
+
+		if(LOCAL_1 == 45)
+		{
+			arg2 -= 2;
+			arg3 -= 2;
+		}
+
+		if(LOCAL_1 >= arg4)
+			return;
+	}
+}

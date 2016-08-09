@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\Service">
+      <UniqueIdentifier>{0ba7bc62-e4df-4274-a49e-16638ccea13b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header\Service">
+      <UniqueIdentifier>{36e9cd5a-5b9f-4f86-9998-6ff0a7d7805b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\PacketAssembly">
+      <UniqueIdentifier>{b9fe57d1-0301-4ae8-bd62-5db4464f535e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header\PacketAssembly">
+      <UniqueIdentifier>{9fdc05b6-e06d-4aa9-a2ac-27c32f0980e6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\AddExp.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ExitParty.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetCreateMob.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetCreateMobTrade.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendEtc.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendAffect.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendScore.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendTrade.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\DLLMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PE_Patch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PacketControl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PE_DefConst.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ReadMessage.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\AddMessage.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\Functions.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ProcessMinTimer.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetCurScore.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\CorrectRefs.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\CloseUser.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\DoLogin.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\AddPoint.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\UseMountFeed.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ControlExp.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\CharListStructure.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ProcessApplyBonus.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetBonusSkillandScorePoint.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GenerateSummon.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GoWorld.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\CheckGetLevel.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GoWorldPosition.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\MobKilled.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\BuyItem.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ControlCanEquip.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ControlSell.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\MoveItem.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\TeleportPosition.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetParryRate.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\Limite de Players.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\FixTrainningCamp.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\FixEden.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SaveUser.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ControlLevel.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ProcessAtk.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\pCommands.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\UseItem.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\UseNpc.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ChangeSkillBar.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\LoadBuffs.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\RecruitPerson.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\pJanelas.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\BASE_GetHpMp.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\Numerica.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\BuySkillLevel.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\Comandos.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PartyFix.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\RegenMob.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\MovePlayer.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\NewTrade.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\DeleteChar.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\LimiteHpMp.cpp">
+      <Filter>Source\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\CreateChar.cpp">
+      <Filter>Source\PacketAssembly</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\AddExp.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ExitParty.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetCreateMob.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\GetCreateMobTrade.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendScore.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendTrade.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendEtc.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\SendAffect.h">
+      <Filter>Header\PacketAssembly</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\DLLMain.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PE_Patch.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PacketControl.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\PE_DefConst.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\AddMessage.h">
+      <Filter>Header\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\ReadMessage.h">
+      <Filter>Header\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\MobKilled.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Source\TMSrv\TMSrv_PacketProtocolV754\Anotações.txt" />
+  </ItemGroup>
+</Project>

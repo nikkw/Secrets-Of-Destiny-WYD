@@ -1,0 +1,130 @@
+void MobKilled(int cId1, int cId2, int arg3, int arg4)
+{
+	// 0x004011A4
+	if(cId1 < 0 || cId1 > 30000)
+		return;
+	if(cId2 < 0 || cId2 > 30000)
+		return;
+
+	if(!cMob[cId1].Mode)
+		return;
+
+	int LOCAL_1 = cMob[cId1].Equip[13].Index;
+
+	if(cMob[cId1].Equip[13].Index == 769)
+	{
+		int LOCAL_2 = BASE_GetItemSanc(&cMob[cId1].Equip[13]);
+
+		if(LOCAL_2 <= 0)
+		{
+			BASE_ClearItem(&cMob[cId1].Equip[13]);
+
+			return;
+		}
+
+		LOCAL_2--;
+
+		if(cMob[cId1].Equip[13].EF1 == EF_SANC)
+			cMob[cId1].Equip[13].EFV1 = LOCAL_2;
+		else if(cMob[cId1].Equip[13].EF2 == EF_SANC)
+			cMob[cId1].Equip[13].EFV2 = LOCAL_2;
+		else if(cMob[cId1].Equip[13].EF3 == EF_SANC)
+			cMob[cId1].Equip[13].EFV3 = LOCAL_2;
+
+		if(cId1 > 0 && cId1 < MAX_PLAYER)
+		{
+			SendItem(cId1, 0, 13, &cMob[cId1].Equip[13]);
+			SendEmotion(cId1, 0xE, 2);
+		}
+
+		SendEquip(cId1, 0);
+
+		cMob[cId1].Status.curHP = cMob[cId1].Status.maxHP;
+
+		if(cId1 < MAX_PLAYER)
+			SetReqHp(cId1);
+
+		SendScore(cId1);
+
+		return;
+	}
+
+	if(*(DWORD*)0x008BF1860 > 1) // ?????
+	{
+		if(cMob[cId1].Target.X == 1046 && cMob[cId1].Target.Y == 1690)
+		{
+			if(cId1 > 0 && cId1 < MAX_PLAYER)
+			{
+				DoTeleport(cId1, 1057, 1742);
+
+				return;
+			}
+		}
+	}
+
+	int LOCAL_3 = cMob[cId2].Equip[0].Index;
+
+	if(cId2 > MAX_PLAYER)//0x0045ACED
+	{
+		if(cMob[cId2].CapeInfo == 4 && LOCAL_3 >= 315 && 345 && cId1 > MAX_PLAYER)
+		{
+			if(cMob[cId1].CapeInfo != 4)
+			{
+				int LOCAL_4 = cMob[cId2].Summoner;
+
+				if(LOCAL_4 > 0 && LOCAL_4 < MAX_PLAYER)
+				{
+					if(cUsers[LOCAL_4].Status)
+					{
+						if(cMob[LOCAL_4].Mode)
+						{
+							int LOCAL_5 = cMob[LOCAL_4].Equip[14].Index;
+
+							if(LOCAL_5 >= 2330 && LOCAL_5 < 2360)
+							{
+								int LOCAL_6 = cMob[LOCAL_4].Equip[14].EF2,
+									LOCAL_7 = cMob[LOCAL_4].Equip[14].EF3,
+									LOCAL_8 = (LOCAL_6 & 0xFF) + 100;
+
+								if(LOCAL_5 == 2330)
+								    LOCAL_8 = (LOCAL_6 & 0xFF) + 25;
+								else if(LOCAL_5 == 2331)
+									LOCAL_8 = (LOCAL_ & 0xFF) + 50;
+
+								if((LOCAL_6 & 0xFF) < cMob[cId1].Status.Level)
+								{
+									if((LOCAL_6 & 0xFF) < 100)
+									{
+										LOCAL_8 = LOCAL_8 + 1;
+
+										if((LOCAL_7 & 0xFF) >= (LOCAL_8 & 0xFF))
+										{
+											LOCAL_7 = 1;
+											LOCAL_6++;
+
+											cMob[LOCAL_4].Equip[14].EFV3 = LOCAL_7;
+											cMob[LOCAL_4].Equip[14].EF2 = LOCAL_6;
+
+											SendClientMessage(LOCAL_4, 0x007D8958);
+
+											SendItem(LOCAL_4, 0, 14, &cMob[LOCAL_4].Equip[14]);
+											MountProcess(LOCAL_4, 0);
+										}
+										else
+										{
+											cMob[LOCAL_4].Equip[14].EFV3 = LOCAL_7;
+											SendItem(LOCAL_4, 0, 14, &cMob[LOCAL_4].Equip[14]);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	//0045AF04  |> 66:C745 D0 3803        MOV WORD PTR SS:[EBP-30],338
+	//
+}

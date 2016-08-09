@@ -1,0 +1,21 @@
+void ClearAreaLevel(int arg1, int arg2, int arg3, int arg4, int lvl_min, int lvl_max) 
+{
+	//0x00401244
+	int LOCAL_1 = 0;
+
+	for(; LOCAL_1 < 100; LOCAL_1++)
+	{
+		if(Users[LOCAL_1].Status != 22)
+			continue;
+
+		st_Mob *player = GetMobFromIndex(LOCAL_1);
+
+		if(!player->Mode)
+			continue;
+
+		if(player->TargetX >= arg1 && player->TargetX <= arg3 &&
+		   player->TargetY >= arg2 && player->TargetY <= arg4)
+			if(player->Status.Level >= lvl_min && player->Status.Level <= lxl_max)
+				DoRecall(LOCAL_1);
+	}
+}

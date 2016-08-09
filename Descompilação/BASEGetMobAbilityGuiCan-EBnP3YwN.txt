@@ -1,0 +1,85 @@
+int BASE_GetMobAbility(STRUCT_MOB* mob, unsigned char Type) //00405410 - ok
+{
+	int ret = FALSE;
+	if(Type == EF_RANGE)
+	{
+		ret = BASE_GetMaxAbility(mob, Type);
+		int body = (mob->Equip[FACE].Index / 10);
+		if(ret < 2 && body == 3)
+            if((mob->Learn & LEARN_20) != 0)
+                ret = 2;
+
+		return ret;
+	}
+
+	int ItemOptions[16];
+	for(int i = 0; i < MAX_EQUIP; i++)
+	{
+		ItemOptions[i] = 0;
+
+		int EquipID = mob->Equip[i].Index;
+		if(EquipID == 0 && i != 7)
+            continue;
+
+		if(i >= 1 && i <= 5)
+            ItemOptions[i] = g_pItemList[EquipID].Unique;
+
+		if(Type == EF_DAMAGE && i == 6)
+            continue;
+
+		if(Type == EF_MAGIC && i == 7)
+            continue;
+
+		if(i == 7 && Type == EF_DAMAGE)
+        {
+			int Damage1 = (BASE_GetItemAbility(&mob->Equip[WEAPON], Type) + BASE_GetItemAbility(&mob->Equip[WEAPON], EF_DAMAGE2));
+            int Damage2 = (BASE_GetItemAbility(&mob->Equip[SHIELD], Type) + BASE_GetItemAbility(&mob->Equip[SHIELD], EF_DAMAGE2));
+
+			int Weapon1 = mob->Equip[WEAPON].Index;
+			int Weapon2 = mob->Equip[SHIELD].Index;
+
+            int Weapon1Unique = 0;
+            if(Weapon1 > 0 && Weapon1 <= MAX_ITEMLIST)
+                Weapon1Unique = g_pItemList[Weapon1].Unique;
+
+            int Weapon2Unique = 0;
+			if(Weapon2 > 0 && Weapon2 <= MAX_ITEMLIST)
+                Weapon2Unique = g_pItemList[Weapon2].Unique;
+
+            if(Weapon1Unique != 0 && Weapon2Unique != 0)
+            {
+                int IncDamage = 0;
+                if(Weapon1Unique == Weapon2Unique)
+                    IncDamage = 30;
+                else
+                    IncDamage = 20;
+
+				if(Damage1 > Damage2)
+                    ret = ((ret + Damage1) + ((Damage2 * IncDamage) / 100));
+                else
+                    ret = ((ret + Damage2) + ((Damage1 * IncDamage) / 100));
+
+                continue;
+            }
+
+            if(Damage1 > Damage2)
+                ret = ret + Damage1;
+            else
+                ret = ret + Damage2;
+
+            continue;
+        }
+
+		int ItemAbility = BASE_GetItemAbility(&mob->Equip[i], Type);
+		if(Type == EF_ATTSPEED && ItemAbility == 1)
+			ItemAbility = 10;
+
+		ret = ret + ItemAbility;
+	}
+
+	if(Type == EF_AC && ItemOptions[1] != 0)
+        if(ItemOptions[1] == ItemOptions[2] && ItemOptions[2] == ItemOptions[3] && ItemOptions[3] == ItemOptions[4] && ItemOptions[4] == ItemOptions[5])
+            ret = ((ret * 105) / 100);
+
+	return ret;
+}

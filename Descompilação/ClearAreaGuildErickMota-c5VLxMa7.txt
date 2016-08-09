@@ -1,0 +1,18 @@
+void ClearAreaGuild(int x1, int y1, int x2, int y2, int GIndex)
+{
+	//0x0040144C
+	int LOCAL_1 = 0;
+
+	for(; LOCAL_1 < MAX_PLAYER; LOCAL_1++)
+	{
+		if(CUsers[LOCAL_1].Status != 22)
+			continue;
+		if(!CMob[LOCAL_1].Mode)
+			continue;
+
+		if(CMob[LOCAL_1].TargetX >= x1 && CMob[LOCAL_1].TargetX <= x2 &&
+		   CMob[LOCAL_1].TargetY >= y1 && CMob[LOCAL_1].TargetY <= y2)
+		    if(CMob[LOCAL_1].GuildIndex != GIndex)
+				DoRecall(LOCAL_1);
+	}
+}

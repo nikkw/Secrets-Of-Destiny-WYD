@@ -1,0 +1,122 @@
+void PartyGridMulticast(int arg1, int arg2,struct MSG_STANDARD *arg3, int arg4, int arg5)	
+{ 
+	//0x0040119F
+	int LOCAL_2 = 23,
+		LOCAL_1 = 23,
+		LOCAL_3 = arg1 - 11,
+		LOCAL_4 = arg2 - 11;
+
+	if(LOCAL_3 + LOCAL_1 >= 4096)
+		LOCAL_1 = LOCAL_1 - (LOCAL_3 + LOCAL_1 - 4096);
+
+	if(LOCAL_4 + LOCAL_2 >= 4096)
+		LOCAL_2 = LOCAL_2 - (LOCAL_4 + LOCAL_2 - 4096);
+
+	if(LOCAL_3 < 0)
+	{
+		/*
+		MOV [LOCAL.3],0
+		MOV EAX,[LOCAL.1]
+		ADD EAX,[LOCAL.3]
+		MOV [LOCAL.1],EAX
+		*/
+		LOCAL_3 = 0;
+
+		LOCAL_1 = LOCAL_1 + LOCAL_3; 
+		// Pra que adicionar se é 0 ? wtf
+	}
+
+	if(LOCAL_4 < 0)
+	{
+		LOCAL_4 = 0;
+
+		LOCAL_2 = LOCAL_2 + LOCAL_4;
+		// Mesma situação do if acima
+	}
+
+	int LOCAL_5 = LOCAL_3,
+		LOCAL_6 = LOCAL_4,
+		LOCAL_7 = LOCAL_3 + LOCAL_1,
+		LOCAL_8 = LOCAL_4 + LOCAL_2,
+		LOCAL_9 = LOCAL_6;
+
+	for(; LOCAL_9 < LOCAL_8; LOCAL_9++)
+	{
+		int LOCAL_10 = LOCAL_5;
+
+		for(; LOCAL_10 < LOCAL_7; LOCAL_10++)
+		{
+			int LOCAL_11 = (LOCAL_9 << 0xD) + LOCAL_10 + *(WORD*)0x003B07D14;
+
+			if(!LOCAL_11)
+				continue;
+
+			if(LOCAL_11 == arg5)
+				continue;
+
+			if(arg5)
+				if(arg5 == pMob[LOCAL_11].Leader)
+					continue;
+		    
+			if(!pMob[LOCAL_11].Mode)
+			{
+				int LOCAL_12 = 0;
+
+				continue;
+			}
+
+			if(!arg3 || LOCAL_11 < 0 || LOCAL_11 > 100)
+				break;
+
+			if(LOCAL_11 == arg4)
+				break;
+
+			if(!pUser[LOCAL_11].AllStatus.Party)
+				continue;
+
+			if(pUser[LOCAL_11].Status != 22 || pUser[LOCAL_11].Service <= 0)
+				return; // Acho que eles devem ter posto return aqui sem querer, tinha de ser continue
+
+			AddMessage((W2Socket*)&pUser[LOCAL_11].Service, arg3, arg3.Size);
+		}
+	}
+
+	if(arg5 <= 0 || arg5 >= 100)
+		return;
+
+	if(pUser[arg5].Status != 22)
+		return;
+
+	if(arg5 != arg4)//0x00440DF6
+		AddMessage((W2Socket*)&pUser[arg5].Service, arg3, arg3.Size);
+
+	int LOCAL_13 = 0;
+
+	for(; LOCAL_13 < 12; LOCAL_13++)
+	{
+		int LOCAL_14 = pMob[arg5].PartList[LOCAL_13];
+
+		if(LOCAL_14 < 0 || LOCAL_14 >= 100)
+			continue;
+
+		if(LOCAL_14 == arg4)
+			continue;
+
+		if(pUser[LOCAL_14].Status != 22)
+			continue;
+
+		if(!pUser[LOCAL_14].AllStatus.Party)
+			continue;
+
+		if(pUser[LOCAL_14].Status != 22)
+			return; // 2 vzs a msm verificação...
+
+		if(pUser[LOCAL_14].Service <= 0)//00440EAA  |. 77 02          |JA SHORT TMSRV.00440EAE
+            return;
+
+		int LOCAL_15 = AddMessage((W2Socket*)&pUser[LOCAL_14].Service, arg3, arg3.Size);
+	
+	    if(!LOCAL_15)
+			CloseUser_OL2(LOCAL_14); // 0x004012A3
+	}
+}

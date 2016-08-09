@@ -1,0 +1,36 @@
+int GetUserByName(char *name)
+{ //4592A0
+	if(name[0] == '+')
+	{
+		char *LOCAL_1 = name + 1;
+		strupr(LOCAL_1);
+
+		for(INT32 LOCAL_2 = 1; LOCAL_2 < MAX_PLAYER; LOCAL_2 ++)
+		{
+			if(CMob[LOCAL_2].Mode == 0)
+				continue;
+
+			if(Users[LOCAL_2].Status != 22)
+				continue;
+
+			if(!strcmp(LOCAL_1, Users[LOCAL_2].Username))
+				return LOCAL_2;
+		}
+
+		return 0;
+	}
+	
+	for(INT32 LOCAL_3 = 1; LOCAL_3 < MAX_PLAYER; LOCAL_3 ++)
+	{
+		if(CMob[LOCAL_3].Mode == 0)
+			continue;
+
+		if(Users[LOCAL_3].Status != 22)
+			continue;
+
+		if(!strcmp(name, Users[LOCAL_3].Username))
+			return LOCAL_3;
+	}
+
+	return 0;
+}

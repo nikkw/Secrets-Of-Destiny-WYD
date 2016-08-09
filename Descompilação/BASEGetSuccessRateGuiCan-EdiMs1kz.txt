@@ -1,0 +1,13 @@
+int BASE_GetSuccessRate(STRUCT_ITEM* item, int OriLacLac100) //00404f10 - ok - atualizada(rates e ref +11)
+{
+	if(item->Index >= 2330 && item->Index < 2390)
+		return FALSE;
+
+	if(OriLacLac100 < 0 || OriLacLac100 > 2) // 0: Ori, 1: Lac, 2: Lac100;
+		return FALSE;
+
+	int getRef = BASE_GetItemSanc(item);
+	int rate = g_pSancRate[OriLacLac100][getRef];
+
+	return rate;
+}

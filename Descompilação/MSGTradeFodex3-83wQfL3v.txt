@@ -1,0 +1,399 @@
+void WINAPI ProcessClientMessage_Trade(int User, char* Msg)
+{
+	STRUCT_TRADE &pMsg = *(STRUCT_TRADE*)Msg;
+
+	if(0 >= pMob[User].Status.curHP || pUser[User].Mode != USER_PLAY)
+	{
+		SendHpMode(User);
+		AddCrackError(User,5,CRACK_NOUSER_TRADE);
+		RemoveTrade(User);
+		return;
+	}
+
+	int alvo = pMsg.OponentID;
+
+	if(alvo <= 0 || alvo >= MAX_USER)
+	{
+		Log("err msg_trade - alvo fora do limit.",pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+		SendClientMessage(User,"Pacote de troca inválido");
+		RemoveTrade(User);
+		return;
+	}
+
+	if( pUser[alvo].Mode != USER_PLAY)
+	{
+		RemoveTrade(User);
+		return;
+	}
+
+	if(pMsg.Gold < 0 || pMsg.Gold > pMob[User].Gold)
+	{
+		RemoveTrade(User);
+		RemoveTrade(alvo);
+		return;
+	}
+
+	for(int i=0; i<MAX_TRADE; i++)
+	{
+		if(pMsg.Item[i].Index != 0)
+		{
+			int invenPos = pMsg.InvenPos[i];
+
+			if(invenPos < 0 || invenPos >= 64)
+				return;
+
+			int ret = memcmp(&(pMsg.Item[i]),&(pMob[User].Inventory[invenPos]), sizeof (STRUCT_ITEM));
+
+			if(ret != 0)
+			{
+				Log("err msg_trade - itens removidos ou alterados.",pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+				return;
+			}
+		}
+
+		if(Player[alvo].Trade.Item[i].Index != 0)
+		{
+			int invenPos = Player[alvo].Trade.InvenPos[i];
+
+			if(invenPos < 0 || invenPos >= 64)
+				return;
+
+			int ret = memcmp(&(pMob[alvo].Inventory[invenPos]),&(Player[alvo].Trade.Item[i]), sizeof (STRUCT_ITEM));
+
+			if(ret != 0)
+			{
+				Log("err msg_trade - itens removidos ou alterados.",pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+				return;
+			}
+		}
+	}
+
+	int UserTarget = Player[User].Trade.OponentID;
+
+	if(UserTarget == alvo)
+	{
+		for(int i=0; i<MAX_TRADE; i++)
+		{
+			int err = 0;
+			
+			if(Player[User].Trade.Item[i].Index != 0)
+			{
+				err = memcmp(&(Player[User].Trade.Item[i]),&(pMsg.Item[i]), sizeof (STRUCT_ITEM));
+			}
+
+			if(Player[User].Trade.Gold != 0)
+			{
+				if(pMsg.Gold != Player[User].Trade.Gold)
+				{
+					err = 1;
+				}
+			}
+			
+			if(err != 0)
+			{
+				Log("err msg_trade - itens removidos ou alterados.",pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+				return;
+			}
+		}
+	}
+	else
+	{
+		if(UserTarget != 0)
+		{
+			SendClientMessage(User,"Pacote de troca inválido");
+			RemoveTrade(User);
+		}
+	}
+		
+	int pGuildID = pMob[User].GuildIndex;
+	int aGuildID = pMob[alvo].GuildIndex;
+	int pGuildType = pMob[User].GuildMemberType;
+
+	int aGuildType = pMob[alvo].GuildMemberType;
+	
+	for(int i=0; i<MAX_TRADE; i++)
+	{
+		if(pMsg.Item[i].Index == 747)
+		{
+			SendClientMessage(User,"Somente com o lider da guilda");
+			SendClientMessage(alvo,"Somente com o lider da guilda");
+
+			RemoveTrade(User);
+
+			if(Player[alvo].Trade.OponentID = User)
+			{
+				RemoveTrade(alvo);
+			}
+
+			return;
+		}
+
+		if(pMsg.Item[i].Index == 508 || pMsg.Item[i].Index == 522 || pMsg.Item[i].Index >= 526 && pMsg.Item[i].Index <= 537 || pMsg.Item[i].Index == 491)
+		{
+			int pG = GetGuild_OL2(&pMsg.Item[i]);
+
+			if(pG == pGuildID || pGuildType != 0)
+				continue;
+			if(pG == aGuildID || aGuildType != 0)
+				continue;
+
+			SendClientMessage(User,"Somente com o lider da guilda");
+			SendClientMessage(alvo,"Somente com o lider da guilda");
+
+			RemoveTrade(User);
+			
+			if(Player[alvo].Trade.OponentID = User)
+			{
+				RemoveTrade(alvo);
+			}
+
+			return;
+		}
+	}
+
+	if(Player[alvo].Trade.OponentID == 0)
+	{
+		Player[User].Trade = pMsg;
+
+		Player[User].Trade.Confirma = 0;
+		Player[User].Trade.Gold = 0;
+
+		pMsg.Header.User = alvo;
+		pMsg.OponentID = User;
+
+		HKD_AddMessage((int)&pUser[alvo].cSock,(char*)&pMsg,pMsg.Header.Size);
+
+		Player[alvo].Trade.Confirma = 0;
+		Player[alvo].Trade.Gold = 0;
+		return;
+	}
+
+	if(Player[alvo].Trade.OponentID != User)
+	{
+		SendClientMessage(User,"Este personagem ja esta trocando itens");
+		RemoveTrade(User);
+		return;
+	}
+
+	for(int c=0; c<MAX_TRADE; c++)
+	{
+		int CarryPos = pMsg.InvenPos[c];
+
+		if(CarryPos == 255)// original if(CarryPos == -1)
+		{
+			memset(&(pMsg.Item[c]), 0,sizeof(STRUCT_ITEM));
+			continue;
+		}
+
+		if(CarryPos < -1 || CarryPos >= 64)
+		{
+			SendClientMessage(User,"Pacote de troca invalido");
+			RemoveTrade(User);
+			return;
+		}
+
+		for(int w=0; w<MAX_TRADE; w++)
+		{
+			if(w == c)
+				continue;
+
+			if(CarryPos == pMsg.InvenPos[w])
+			{
+				SendClientMessage(User,"Pacote de troca invalido");
+				RemoveTrade(User);
+				return;
+			}
+		}
+
+		pMsg.Item[c] = pMob[User].Inventory[CarryPos];
+	}
+
+	if(pMsg.Confirma == 1)
+	{
+		Player[User].Trade.Confirma = 1;
+
+		Player[User].Trade.Header.Key = pMsg.Header.Key;
+		Player[User].Trade.Header.CheckSum = pMsg.Header.CheckSum;
+		Player[User].Trade.Header.TimeStamp = pMsg.Header.TimeStamp;
+
+		int ret =  memcmp(&Player[User].Trade,&pMsg,sizeof(STRUCT_TRADE));
+
+		if(ret)
+		{
+			RemoveTrade(User);
+			RemoveTrade(alvo);
+			Log("err msg_trade - Clique no botão de verificação de dados, mas diferente.",pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+			return;
+		}
+
+		if(Player[alvo].Trade.Confirma == 1)
+		{
+			if(Player[User].Trade.Gold < 0 || Player[User].Trade.Gold > 2000000000)
+			{
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+			}
+
+			if(Player[alvo].Trade.Gold < 0 || Player[alvo].Trade.Gold > 2000000000)
+			{
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+			}
+
+
+			int pCoin = pMob[User].Gold - Player[User].Trade.Gold + Player[alvo].Trade.Gold;
+			//0x7D8E58 "Limite de 2 bilhões de gold."
+			if(pCoin < 0 || pCoin > 2000000000)
+			{
+				SendClientMessage(User,"Limite de 2 bilhões de gold.");
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+				return;
+			}
+
+			int aCoin = pMob[alvo].Gold - Player[alvo].Trade.Gold + Player[User].Trade.Gold;
+
+			if(aCoin < 0 || aCoin > 2000000000)
+			{
+				SendClientMessage(alvo,"Limite de 2 bilhões de gold.");
+				RemoveTrade(User);
+				RemoveTrade(alvo);
+				return;
+			}
+			
+			if(Player[User].Trade.Gold > pMob[User].Gold)
+			{
+				//0x7D2F58 "Você não possui está quantia"
+				SendClientMessage(User,(char*)0x7D2F58);
+				SendClientMessage(alvo,(char*)0x7D2F58);
+				return;
+			}
+
+			if(Player[alvo].Trade.Gold > pMob[alvo].Gold)
+			{
+				SendClientMessage(User,(char*)0x7D2F58);
+				SendClientMessage(alvo,(char*)0x7D2F58);
+				return;
+			}
+			
+			STRUCT_ITEM pBufferItem[64];
+			int b1968 = HKD_BASE_CanTrade(pBufferItem,pMob[User].Inventory,Player[User].Trade.InvenPos,Player[alvo].Trade.Item);
+			
+			STRUCT_ITEM aBufferItem[64];
+			int b196C = HKD_BASE_CanTrade(aBufferItem,pMob[alvo].Inventory,Player[alvo].Trade.InvenPos,Player[User].Trade.Item);;
+
+			if(b1968 == 0 && b196C == 0)
+			{
+				//0x7D3058 Ambos não possui espaço no inventario
+				SendClientMessage(User,"Ambos não possui espaço no inventario");
+				SendClientMessage(alvo,"Ambos não possui espaço no inventario");
+				return;
+			}
+
+			if(b1968 == 0)
+			{
+				//0x7D30D8 "Você não possui espaço livre no inventário"
+				SendClientMessage(User,"Você não possui espaço livre no inventário");
+				SendClientMessage(alvo,"Ambos não possui espaço no inventario");
+				return;
+			}
+
+			if(b196C == 0)
+			{
+				SendClientMessage(User,"Ambos não possui espaço no inventario");
+				SendClientMessage(alvo,"Você não possui espaço livre no inventário");
+				return;
+			}
+
+			memcpy(pMob[User].Inventory,pBufferItem,sizeof (STRUCT_ITEM) * 64);
+			memcpy(pMob[alvo].Inventory,aBufferItem,sizeof (STRUCT_ITEM) * 64);
+
+			pMob[User].Gold = pCoin;
+			pMob[alvo].Gold = aCoin;
+
+			SendCarry(User);
+			SendCarry(alvo);
+			//1770
+			int money1 = Player[User].Trade.Gold;
+			//1774
+			int money2 = Player[alvo].Trade.Gold;
+			
+			//1778
+			int nn1 = 0;
+			//177C
+			int nn2 = 0;
+
+			char szTMP[512];
+			sprintf_s(szTMP,"tra, %s %d \n",pUser[alvo].Username,money1);
+
+			char strItem[128];
+			//19A0
+			int m;
+
+			for(m=0; m<MAX_TRADE; m++)
+			{
+				BASE_NeedLog(&Player[User].Trade.Item[m], 0);
+				continue;
+
+				BASE_GetItemCode(&Player[User].Trade.Item[m],strItem);
+
+				strcat(szTMP,strItem);
+
+				if(szTMP != 0)
+					nn1 = 1;
+			}
+
+			if(nn1 == 0 || money1 > *(DWORD*)0x4C4B40)
+			{
+				Log(szTMP,pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+			}
+
+			sprintf_s(szTMP,"tra, %s %d \n",pUser[User].Username,money2);
+
+			for(m=0; m<MAX_TRADE; m++)
+			{
+				BASE_NeedLog(&Player[alvo].Trade.Item[m], 0);
+				continue;
+
+				BASE_GetItemCode(&Player[alvo].Trade.Item[m],strItem);
+
+				strcat(szTMP,strItem);
+
+				if(szTMP != 0)
+					nn2 = 1;
+			}
+
+			if(nn2 == 0 || money2 > *(DWORD*)0x4C4B40)
+			{
+				Log(szTMP,pUser[User].Username,pUser[User].In_Addr.S_un.S_addr);
+			}
+
+			RemoveTrade(User);
+			RemoveTrade(alvo);
+			return;
+
+		}
+		
+		SendClientSignal(User,User,0x386);
+
+		pMsg.Header.User = alvo;
+		pMsg.OponentID = User;
+
+		HKD_AddMessage((int)&pUser[alvo].cSock,(char*)&pMsg,pMsg.Header.Size);
+		return;
+	}
+
+
+	Player[User].Trade = pMsg;
+	Player[User].Trade.Confirma = 0;
+	Player[alvo].Trade.Confirma = 0;
+	pMsg.Header.User = alvo;
+	pMsg.OponentID = User;
+	HKD_AddMessage((int)&pUser[alvo].cSock,(char*)&pMsg,pMsg.Header.Size);
+}

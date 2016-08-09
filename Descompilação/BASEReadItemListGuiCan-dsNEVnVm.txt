@@ -1,0 +1,65 @@
+int BASE_ReadItemList(void) //004065C0 - ok
+{
+	int size = sizeof(STRUCT_ITEMLIST) * MAX_ITEMLIST;
+	char *temp = (char*)g_pItemList;
+	int tsum = 0;
+
+	FILE* fp;
+	fp = fopen(".\\ItemList.bin", "rb");
+	if(fp == NULL)
+	{
+		MessageBox(NULL, "Can't read ItemList.bin", "ERROR", NULL);
+		return FALSE;
+	}
+
+	fread(g_pItemList, sizeof(STRUCT_ITEMLIST) * MAX_ITEMLIST, 1, fp);
+	fread(&tsum, sizeof(tsum), 1 , fp);
+	fclose(fp);
+
+	int sum = BASE_GetSum2((char*)g_pItemList, size);
+	#ifndef _DEBUG
+		if(ITEM_CHECKSUM != sum) 
+			return FALSE;
+	#endif
+
+	for(int i = 0; i < size; i++)
+		temp[i] = temp[i] ^ 0x5A;
+
+	int Handle = open(".\\ExtraItem.bin", _O_RDONLY | _O_BINARY, 0);
+	if(Handle == -1)
+		return TRUE;
+	else
+	{	
+		while(1)
+		{
+			char buff[256];
+			STRUCT_ITEMLIST* item;
+			int sz = read(Handle, buff, sizeof(STRUCT_ITEMLIST) + 2);
+			if(sz < sizeof(STRUCT_ITEMLIST) + 2) 
+				break;
+
+			short idx = *((short*)buff);
+			if(idx <= 0 || idx >= MAX_ITEMLIST)
+				continue;
+
+			item = (STRUCT_ITEMLIST *)(buff + 2);
+			g_pItemList[idx] = *item;
+		}
+
+		close(Handle);
+
+		#ifndef _DEBUG
+			for(int i = 0; i < size; i++)
+				temp[i] = temp[i] ^ 0x5A;
+
+			int sum = BASE_GetSum2((char*)g_pItemList, size);
+			if(ITEM_CHECKSUM2 != sum)
+				return FALSE;
+
+			for(int i = 0; i < size; i++)
+				temp[i] = temp[i] ^ 0x5A;
+		#endif
+	}
+
+	return TRUE;
+}

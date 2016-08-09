@@ -1,0 +1,58 @@
+//409B60
+BOOL BASE_CanTrade(STRUCT_ITEM *BufferItem,STRUCT_ITEM *UserInven,unsigned char *BufferUserInvenPos,STRUCT_ITEM *BufferAlvoItem) 
+{
+	STRUCT_ITEM item[MAX_TRADE];
+	
+	memcpy(item, BufferAlvoItem, sizeof (STRUCT_ITEM) * MAX_TRADE);
+
+	memcpy(BufferItem, UserInven, sizeof (STRUCT_ITEM) * 64);
+	
+	//local17
+	int i;
+	
+	for(i=0; i<MAX_TRADE; i++)
+	{
+		//local18
+		int CarryPos = BufferUserInvenPos[i];
+
+		if(CarryPos == 255)//original if(CarryPos == -1)
+			continue;
+
+		BASE_ClearItem(&BufferItem[CarryPos]);
+	}
+
+	//int EF_GRID = 33;
+	
+	HKD_BASE_SortTradeItem(item, 33);
+
+	for(i=0; i<MAX_TRADE; i++)
+	{
+		if(item[i].Index == 0)
+			continue;
+		
+		//EBP - 4C
+		int pos;
+		
+		for(pos=0; pos<64; pos++)
+		{
+			
+			int DestX = pos % CARRYGRIDX;
+			
+			int DestY = pos / CARRYGRIDX;
+			
+			int error = -2;
+
+			int ret = BASE_CanCarry(&item[i],BufferItem,DestX,DestY,&error);
+
+			if (ret == 1)
+			{
+				BufferItem[pos] = item[i];
+				break;
+			}
+		}
+		
+		if(pos == 64)
+			return 0;
+	}
+	return 1;
+}

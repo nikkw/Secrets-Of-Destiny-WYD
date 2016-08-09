@@ -1,0 +1,11 @@
+int GetEmptyItem()
+{//459160
+	static BASE_Item CItem[5000];
+	for(INT32 LOCAL_1 = 1;LOCAL_1 < 5000; LOCAL_1 ++)
+	{
+		if(CItem[LOCAL_1].Open == 0)
+			return LOCAL_1;// mode
+	}
+
+	return 0;
+}

@@ -1,0 +1,13 @@
+void SendGuildNotice(int GIndex, char *Message)
+{
+	//0x00401479
+	int LOCAL_1 = 0;
+	for(; LOCAL_1 < 100; LOCAL_1++)
+	{
+		if(Users[LOCAL_1].Status != 22)
+			continue;
+		
+		if(CMob[LOCAL_1].GuildIndex == GIndex)
+                    SendClientMessage(LOCAL_1, Message);
+	}
+}

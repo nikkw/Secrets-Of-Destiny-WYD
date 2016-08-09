@@ -1,0 +1,22 @@
+int BASE_GetDamage(int damage, int defense, int combat) //004022C0 - ok
+{
+	int calcDmg = damage - (defense >> 1);
+	if((combat >> 1) > 7)
+		combat = 7;
+
+	int calcRand = 12 - combat;
+	int incDmg = (rand() % calcRand) + combat + 99;
+
+	calcDmg = (calcDmg * incDmg) / 100;
+	if(calcDmg < -50)
+		calcDmg = 0;
+	else if(calcDmg >= -50 && calcDmg < 0)
+		calcDmg = (calcDmg + 50) / 7;
+	else if(calcDmg >= 0 && calcDmg <= 50)
+		calcDmg = ((calcDmg * 5) >> 2) + 7;
+
+	if(calcDmg <= 0)
+		calcDmg = 1;
+
+	return calcDmg;
+}

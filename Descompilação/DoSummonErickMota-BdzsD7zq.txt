@@ -1,0 +1,16 @@
+void DoSummon(int arg1, int arg2, int arg3)
+{
+	//0x004015FF
+
+	int LOCAL_1 = GetEmptyMobGrid(arg1, &arg2, &arg3);
+
+	p366 LOCAL_14;
+	GetAction(arg1, arg2, arg3, &LOCAL_14);
+
+	LOCAL_14.mType = 1;
+
+	if(arg1 < 100)
+		AddMessage(&LOCAL_14, arg1);
+
+	GridMulticast_OL1(arg1, arg2, arg3, &LOCAL_14);
+}

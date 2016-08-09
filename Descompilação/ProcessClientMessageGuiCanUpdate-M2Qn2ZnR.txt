@@ -1,0 +1,299 @@
+void ProcessClientMessage(int conn, char* msg) //0042ea00
+{
+	__HEADER pHeader = *(__HEADER*)msg;
+
+	if(ServerDown >= 120)
+		return;
+
+	if((pHeader.PacketId & FLAG_CLIENT2GAME) == 0 || pHeader.ClientId < MOB_EMPTY || pHeader.ClientId >= MAX_PLAYER)
+	{
+		sprintf(temp, "Unknown Packet Type:%d ID:%d Size:%d KeyWord:%d", pHeader.PacketId, pHeader.ClientId, pHeader.Size, pHeader.Key);
+		//Log(temp, "-system", NULL);
+		return;
+	}
+
+	//0042EAB5
+	if(conn > MOB_EMPTY && conn < MAX_PLAYER)
+		pUser[conn].LastReceiveTime = SecCounter;
+
+	if(pHeader.PacketId == _MSG_Ping)
+		return;
+
+	//0042EAEB
+	switch(pHeader.PacketId)
+	{
+		case _MSG_GetItem: //0042EB06 0x270
+		{
+			//0043925C
+			MSG_GetItem* pItem = (MSG_GetItem*)msg;
+			if(pMob[conn].MOB.CurrentScore.Hp <= 0 || pUser[conn].Mode != USER_PLAY)
+			{
+				SendHpMode(conn);
+				//AddCrackError(conn, 1, 0xD);
+				return;
+			}
+
+			//004392AC
+			if(pItem->DestType != INV_TYPE)
+			{
+				//Log("DEBUG: GetItem with wrong DestType", pUser[conn].AccountName, pUser[conn].IP);
+				return;
+			}
+
+			//004392E9
+			int ItemIdx = pItem->ItemID - 10000;
+			if(ItemIdx < 0 || ItemIdx > MAX_ITEMLIST || pItemBuffer[ItemIdx].Mode == 0)
+			{
+				if(pItemBuffer[ItemIdx].Mode != 0)
+				{
+					sprintf(temp, "GetItemFail idx:%d mode:%d", ItemIdx, pItemBuffer[ItemIdx].Mode);
+					//Log(temp, pUser[conn].AccountName, pUser[conn].IP);
+				}
+
+				MSG_RemoveItem rItem;
+				rItem.Header.PacketId = _MSG_RemoveItem;
+				rItem.Header.Size = sizeof MSG_RemoveItem;
+				rItem.Header.ClientId = 0x7530;
+
+				//004393AF
+				rItem.ItemID = pItem->ItemID;
+
+				pUser[conn].cSock.AddMessage((char*)&rItem, sizeof MSG_RemoveItem);
+				return;
+			}
+
+			//004393ED
+			if(pMob[conn].TargetX < (pItemBuffer[ItemIdx].PosX - 3) || pMob[conn].TargetY < (pItemBuffer[ItemIdx].PosY - 3) || pMob[conn].TargetX > (pItemBuffer[ItemIdx].PosX + 3) || pMob[conn].TargetY > (pItemBuffer[ItemIdx].PosY + 3))
+			{
+				//0043947D
+				sprintf(temp, "GetItemFail posx:%d posy:%d tx:% ty:%d", pItemBuffer[ItemIdx].PosX, pItemBuffer[ItemIdx].PosY, pMob[conn].TargetX, pMob[conn].TargetY);
+				//Log(temp, pUser[conn].AccountName, pUser[conn].IP);
+				return;
+			}
+
+			//00439501
+			if(ItemIdx == 1727 || pMob[conn].MOB.CurrentScore.Level < 1000)
+				return;
+			
+			//00439529
+			STRUCT_ITEM checkItem = pItemBuffer[ItemIdx].ITEM;
+			int ItemIndex = checkItem.Index;
+			if(ItemIndex <= 0 || ItemIndex >= MAX_ITEMLIST)
+				return;
+
+			//00439567
+			if(checkItem.Index == 470) //Pilula do poder
+			{
+				int temp1 = 0;
+				int temp2 = 1;
+				temp2 = temp2 << temp1;
+
+				if((pMob[conn].MOB.QuestInfo & temp2) != 0)
+				{
+					//004395C2
+					BASE_GetLanguage(temp, 71);
+					SendClientMessage(conn, temp);
+					return;
+				}
+
+				//004395E7
+				SendClientMessage(conn, g_pMessageStringTable[temp1 + 1]);
+				pMob[conn].MOB.QuestInfo = pMob[conn].MOB.QuestInfo | temp2;
+
+				//0043962E
+				int ItemPosX = pItemBuffer[ItemIdx].PosX;
+				int ItemPosY = pItemBuffer[ItemIdx].PosY;
+				BASE_ClearItem(&checkItem);
+				pItemGrid[ItemPosX][ItemPosY] = 0;
+				pItemBuffer[ItemIdx].Mode = 0;
+
+				MSG_RemoveItem rItem;
+				rItem.Header.PacketId = _MSG_RemoveItem;
+				rItem.Header.Size = sizeof MSG_RemoveItem;
+				rItem.Header.ClientId = 0x7530;
+
+				//004393AF
+				rItem.ItemID = ItemIdx + 10000;
+
+				GridMulticast(ItemPosX, ItemPosY, (MSG_STANDARD*)&rItem, 0);
+
+				pMob[conn].MOB.SkillPoint = pMob[conn].MOB.SkillPoint + 9;
+				SendEmotion(conn, 0xE, 3);
+				SendEtc(conn);
+				return;
+			}
+
+			//00439723
+			if(ItemIndex >= 490 && ItemIndex <= 500)
+			{
+				sprintf(temp, "PlayerName%s - ItemName%s", pMob[conn].MOB.Name, g_pItemList[ItemIndex].Name);
+				SendNotice(temp);
+
+				int ItemPosX = pItemBuffer[ItemIdx].PosX;
+				int ItemPosY = pItemBuffer[ItemIdx].PosY;
+				pItemGrid[ItemPosX][ItemPosY] = 0;
+				pItemBuffer[ItemIdx].Mode = 0;
+
+				MSG_RemoveItem rItem;
+				rItem.Header.PacketId = _MSG_RemoveItem;
+				rItem.Header.Size = sizeof MSG_RemoveItem;
+				rItem.Header.ClientId = 0x7530;
+
+				//004397F2
+				rItem.ItemID = ItemIdx + 10000;
+
+				GridMulticast(ItemPosX, ItemPosY, (MSG_STANDARD*)&rItem, 0);
+			}
+
+			//00439823
+			int ItemPosX = pItemBuffer[ItemIdx].PosX;
+			int ItemPosY = pItemBuffer[ItemIdx].PosY;
+
+			MSG_RemoveItem rItem;
+			rItem.Header.PacketId = _MSG_RemoveItem;
+			rItem.Header.Size = sizeof MSG_RemoveItem;
+			rItem.Header.ClientId = 0x7530;
+
+			//00439868
+			rItem.ItemID = pItem->ItemID;
+
+			if(ItemPosX < 0 || ItemPosX >= MAX_GRIDX || ItemPosY < 0 || ItemPosY >= MAX_GRIDY)
+			{
+				//004398A3
+				pUser[conn].cSock.AddMessage((char*)&rItem, sizeof MSG_RemoveItem);
+				pItemBuffer[ItemIdx].Mode = 0;
+				return;
+			}
+
+			//004398E3
+			if(pItemGrid[ItemPosX][ItemPosY] != ItemIdx)
+			{
+				pUser[conn].cSock.AddMessage((char*)&rItem, sizeof MSG_RemoveItem);
+				if(pItemGrid[ItemPosX][ItemPosY] == 0)
+					pItemGrid[ItemPosX][ItemPosY] = ItemIdx;
+
+				return;
+			}
+
+			//0043996C
+			if(ItemPosX != pItem->PosX && ItemPosY != pItem->PosY)
+				pUser[conn].cSock.AddMessage((char*)&rItem, sizeof MSG_RemoveItem);
+
+			//004399C1
+			int ItemVolatile = BASE_GetItemAbility(&checkItem, EF_VOLATILE);
+			if(ItemVolatile == 2)
+			{
+				//004399E5
+				int GetCoin = BASE_GetItemAbility(&checkItem, EF_HWORDCOIN);
+				int CalcCoin = GetCoin << 8;
+
+				GetCoin = BASE_GetItemAbility(&checkItem, EF_LWORDCOIN);
+				CalcCoin = CalcCoin + GetCoin;
+
+				int gold = pMob[conn].MOB.Gold + CalcCoin;
+				if(gold >= 2000000000)
+				{
+					SendClientMessage(conn, "Limite de gold atingido");
+					return;
+				}
+
+				//00439A7F
+				pMob[conn].MOB.Gold = pMob[conn].MOB.Gold + CalcCoin;
+				rItem.ItemID = checkItem.Index;
+				BASE_ClearItem(&checkItem);
+			}
+			else
+			{
+				if(pItem->DestPos < 0 || pItem->DestPos >= MAX_INVEN) //00439ACE
+				{
+					//Log("DEBUG: Trading Fails. (wrong source position)", pUser[conn].AccountName, pUser[conn].IP);
+					return;
+				}
+
+				//00439B18
+				STRUCT_ITEM* Inven = &pMob[conn].MOB.Inventory[pItem->DestPos];
+				int x = pItem->DestPos % 9;
+				int y = pItem->DestPos / 9;
+				int error = -2;
+				int ret = BASE_CanCarry(&checkItem, pMob[conn].MOB.Inventory, x, y, &error);
+				if(ret == 0 || error > 0 || error <= MAX_INVEN)
+				{
+					error = error - 1;
+					SendItem(conn, INV_TYPE, error, &pMob[conn].MOB.Inventory[error]);
+					return;
+				}
+
+				//00439C04
+				rItem.ItemID = checkItem.Index;
+				Inven = &checkItem;
+
+				//00439C5F
+				if(BASE_NeedLog((STRUCT_ITEM*)&rItem, 0) != 0)
+				{
+					char msg;
+					BASE_GetItemCode((STRUCT_ITEM*)&rItem, &msg);
+					sprintf(temp, "get %s", &msg);
+					//Log(temp, pUser[conn].AccountName, pUser[conn].IP);
+				}
+			}
+
+			//00439CD0
+			MSG_CNFGetItem respItem;
+			respItem.Header.PacketId = _MSG_CNFGetItem;
+			respItem.Header.Size = sizeof MSG_CNFGetItem;
+			respItem.Header.ClientId = 0x7530;
+
+			respItem.DestType = pItem->DestType;
+			respItem.DestPos = pItem->DestPos;
+
+			pUser[conn].cSock.AddMessage((char*)&respItem, sizeof MSG_CNFGetItem);
+			GridMulticast(ItemPosX, ItemPosY, (MSG_STANDARD*)&rItem, 0);
+			pItemGrid[ItemPosX][ItemPosY] = 0;
+			pItemBuffer[ItemIdx].Mode = 0;
+		} break;
+
+		case _MSG_SwapItem: //0042EB51 0x376
+		{
+			//0043FE71
+			MSG_SwapItem* pMoveItem = (MSG_SwapItem*)msg;
+			if(pMob[conn].MOB.CurrentScore.Hp == 0 || pUser[conn].Mode != USER_PLAY)
+			{
+				SendHpMode(conn);
+				//AddCrackError(conn, 1, 0x13);
+				return;
+			}
+
+			//0043FEC1
+			if(pUser[conn].Trade.OpponentID != 0)
+			{
+				//RemoveTrade(conn);
+				return;
+			}
+
+			//0043FEE8
+			if(pUser[conn].TradeMode != 0)
+			{
+				if(pMoveItem->SrcType == STORAGE_TYPE || pMoveItem->DestType == STORAGE_TYPE)
+				{
+					SendClientMessage(conn, "");
+					return;
+				}
+			}
+
+			//0043FF30
+			if(pMoveItem->SrcType == STORAGE_TYPE || pMoveItem->DestType == STORAGE_TYPE)
+			{
+				if(pMob[conn].MOB.ClassInfo != 3 || (pMob[conn].MOB.Learn & LEARN_13) == 0)
+				{
+					//0043FF86
+
+				}
+			}
+
+			//004400C9
+
+		} break;
+
+	}
+
+}

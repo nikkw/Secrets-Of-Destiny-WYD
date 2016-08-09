@@ -1,0 +1,47 @@
+int BASE_GetBonusItemAbilityNosanc(STRUCT_ITEM* item, unsigned char Type) //00404aa0 - ok
+{
+	if(item->Index >= 2330 && item->Index < 2390)
+		return FALSE;
+
+	int ret = FALSE;
+	int itemId = item->Index;
+	if(itemId <= 0 && itemId > MAX_ITEMLIST)
+		return ret;
+
+	for(int i = 0; i < 3; i++)
+    {
+		if(item->Effect[i].Index != Type)
+			continue;
+
+		int EffValue = item->Effect[i].Value;
+		if(Type == EF_CLASS && EffValue == 1)
+			EffValue = 10;
+
+		ret = ret + EffValue;
+		break;
+	}
+
+	if(Type == EF_RESIST1 || Type == EF_RESIST2 || Type == EF_RESIST3 || Type == EF_RESIST4)
+    {
+		int i;
+        for(i = 0; i < 12; i++)
+        {
+            if(g_pItemList[itemId].Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + g_pItemList[itemId].Effect[i].Value;
+            break;
+        }
+
+        for(i = 0; i < 3; i++)
+        {
+            if(item->Effect[i].Index != EF_RESISTALL)
+                continue;
+
+            ret = ret + item->Effect[i].Value;
+            break;
+        }
+    }
+
+	return ret;
+}

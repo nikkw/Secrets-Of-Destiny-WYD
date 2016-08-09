@@ -1,0 +1,32 @@
+// Essa vai ser removida da TMsrv porque os cálculos para 7xx não tem nada a ver com isso
+INT32 GetParryRate(stCharacter* mob, INT32 parry)
+{
+	INT32 result[3];
+ 
+	if(parry > 100)
+		parry = 100;
+	else if(parry < 0)
+		parry = 0;
+ 
+	result[0] = mob->Status.DEX;
+	result[1] = mob->Status.DEX - 200;
+ 
+	if(result[0] > 200)
+		result[0] = 200;
+ 
+	if(result[1] < 0)
+		result[1] = 0;
+  
+	if(result[1] > 300)
+		result[1] = 300;
+  
+	result[2] = result[0] + parry;
+ 
+	if(mob->AffectInfo.Evasion & 8)
+		result[2] += 100;
+ 
+	if(mob->AffectInfo.Evasion || mob->AffectInfo.Evasion)
+		result[2] += 50;
+ 
+	return result[2];
+}

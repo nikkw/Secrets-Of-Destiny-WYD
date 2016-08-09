@@ -1,0 +1,23 @@
+struct p339 
+{
+	PacketHeader Header;
+
+	UINT32 Gold;
+};
+
+void SendCargoCoin(int clientId)
+{ // 00441710 ok
+	if(clientId <= 0 || clientId >= MAX_PLAYER || Users[clientId].Status != 22 || Users[clientId].Service.FD <= 0)
+		return;
+
+	p339 p;
+	p.Header.PacketId = 0x339;
+	p.Gold = 16;
+	p.Header.Size = 16;
+	
+	p.Gold = Users[clientId].Storage.Gold;;
+	
+	INT32 LOCAL_5 = AddMessage((W2Socket*)&Users[clientId].Service, (INT8*)&p, sizeof p339); // nocaso, é addmessage e pa
+	if(LOCAL_5 == 0)
+		CloseUser_OL2(clientId);
+}

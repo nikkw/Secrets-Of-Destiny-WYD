@@ -1,0 +1,4 @@
+void BASE_GetItemCode(STRUCT_ITEM* item, char* str) //00402ef0 - ok 
+{    
+	sprintf(str, "%04X %02X %02X %02X %02X %02X %02X", item->Index, item->EF1, item->EFV1, item->EF2, item->EFV2, item->EF3, item->EFV3);
+}

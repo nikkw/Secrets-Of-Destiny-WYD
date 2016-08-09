@@ -1,0 +1,13 @@
+int BASE_GetMobCheckSum(STRUCT_MOB* mob) //004058c0 - ok
+{
+	int ret = FALSE;
+	memset((void*)&mob->BaseScore, 0, sizeof(mob->BaseScore));
+
+	int i;
+	for(i = 0 ; i < MAX_EQUIP; i++)
+		ret = ret + mob->Equip[i].Index * i;
+	for(i = 0; i < MAX_INVEN; i++)
+		ret = ret + mob->Inventory[i].Index * i;
+
+	return ret;
+}

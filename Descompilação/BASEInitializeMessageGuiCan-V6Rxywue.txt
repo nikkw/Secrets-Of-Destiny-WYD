@@ -1,0 +1,61 @@
+void BASE_InitializeMessage(char* file) //00409d10 - ok
+{
+	memset(g_pMessageStringTable, MAX_STRING, 128);
+	FILE* fp  =  fopen(file, "rt");
+	if(fp == NULL)
+		return;
+
+	char str[512];
+	char part1[256];
+	char* cont;
+	while(1)
+	{
+		int Index = -1;
+		char* ret = fgets((char*)str, 1024, fp);
+		if(ret == NULL)
+			break;
+
+		sscanf(str, "%d %s", &Index, part1);
+		str[510] = 0; 
+		str[511] = 0; 
+		if(Index <= 0 || Index > MAX_STRING)
+			continue;
+
+		int TabPos = 0;
+		int i;
+		for(i = 0; i < 256; i++)
+		{
+			if(str[i] == '\t')
+			{
+				TabPos = i;
+				break;
+			}
+		}
+
+		if(TabPos == 0)
+		{
+			MessageBox(NULL, str, "Can't parse String", MB_OK);
+			continue;
+		}
+			
+		cont = (char*)(str + TabPos + 1);
+		for(i = 0; i < 128; i++)
+		{
+			if(cont[i] == '\t' || cont[i] == 10 || cont[i] == 0)
+			{
+				cont[i] = 0;
+				break;
+			}
+		}
+
+		int len = (int)strlen(cont);
+		if(len <= 0 || len >= 128)
+		{
+			MessageBox(NULL, str, "Empty or Long String", MB_OK);
+			continue;
+		}
+
+		strcpy((char*)g_pMessageStringTable[Index], cont);
+	 }
+     fclose(fp);
+}

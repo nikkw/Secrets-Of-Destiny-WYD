@@ -1,0 +1,30 @@
+int BASE_GetIndex(STRUCT_ITEM* item) // - ok
+{
+	int hword = FALSE;
+	int lword = FALSE;
+	if(item->Index >= 2330 && item->Index < 2390)
+		return FALSE;
+
+	if(item->EF1 == EF_HWORDINDEX || item->EF2 == EF_HWORDINDEX || item->EF3 == EF_HWORDINDEX)
+	{
+		if(item->EF1 == EF_HWORDINDEX) 
+			hword = (unsigned char)item->EFV1;
+		else if(item->EF2 == EF_HWORDINDEX)
+			hword = (unsigned char)item->EFV2;
+		else
+			hword = (unsigned char)item->EFV3;
+	}
+
+	if(item->EF1 == EF_LWORDINDEX || item->EF2 == EF_LWORDINDEX || item->EF3 == EF_LWORDINDEX)
+	{
+		if(item->EF1 == EF_LWORDINDEX)
+			lword = (unsigned char)item->EFV1;
+		else if(item->EF2 == EF_LWORDINDEX)
+			lword = (unsigned char)item->EFV2;
+		else
+			lword = (unsigned char)item->EFV3;
+	}
+
+	int value = ((hword << 8) + lword);
+	return value;
+}

@@ -1,0 +1,340 @@
+LONG APIENTRY MainWndProc(HWND hWnd, UINT message, UINT wParam, LONG lParam) //0042d530 - ok
+{
+	switch(message)    
+	{
+		case WM_TIMER:
+		{
+			if(wParam == TIMER_SEC)
+				//ProcessSecTimer();
+			if(wParam == TIMER_MIN){}
+				//ProcessMinTimer();
+		} break;
+
+		case WSA_READDB:
+		{
+			//0042D812
+			if(WSAGETSELECTEVENT(lParam) != FD_READ)
+  	        {
+				//Log("err, DB connection close.","-system",0);
+				Sleep(200);
+				DBServerSocket.CloseSocket();
+
+				int ret = FALSE;
+				for(int i = 0; i < 2; i++)
+				{
+					int* Ip = (int*)LocalIP;
+					CurrentTime = timeGetTime();
+
+					//0042D894
+					sprintf(temp, "err, start reconnect DB %d", CurrentTime);
+					//Log(temp, "-system", NULL);
+
+					ret = DBServerSocket.ConnectServer(DBServerAddress, DBServerPort, *Ip, WSA_READDB);
+					if(ret != NULL)
+						break;
+
+					Sleep(200);
+				}
+
+				//0042D906
+				CurrentTime = timeGetTime();
+				sprintf(temp, "err, end reconnect DB %d", CurrentTime);
+				//Log(temp, "-system", NULL);
+
+				//0042D947
+				if(ret == NULL)
+				{
+					//Log("err, reconnect DB fail", "-system", NULL);
+					PostQuitMessage(0);
+					return TRUE;
+				}
+				else
+				{
+					return TRUE;
+				}
+			}
+
+			//0042D986
+			if(DBServerSocket.Receive() == FALSE)
+			{
+				//Log("err, wsareaddb fail","-system", NULL);
+				Sleep(200);
+				DBServerSocket.CloseSocket();
+
+				int ret = FALSE;
+				for(int i = 0; i < 2; i++)
+				{
+					//0042D9EA
+					int* Ip = (int*)LocalIP;
+					ret = DBServerSocket.ConnectServer(DBServerAddress, DBServerPort, *Ip, WSA_READDB);
+					if(ret != NULL)
+						break;
+
+					Sleep(200);
+				}
+
+				if(ret == NULL)
+				{
+					//Log("reconnect DB fail", "-system", NULL);
+					PostQuitMessage(0);
+					return TRUE;
+				}
+				else
+				{
+					return TRUE;
+				}
+			}
+
+			//0042DA71
+			int Error = FALSE;
+			int ErrorCode = FALSE;
+            while(TRUE)
+			{
+				char* Msg = DBServerSocket.ReadMessage(&Error, &ErrorCode);
+				if(Msg == NULL)
+					break;
+
+				//0042DAAC
+				MSG_STANDARD* CheckPacket = (MSG_STANDARD*)Msg;
+				if(BASE_CheckPacket(CheckPacket))
+				{
+					sprintf(temp, "**PACKET_DEBUG** PacketID:%d Size:%d", CheckPacket->Header.PacketId, CheckPacket->Header.Size);
+					//Log(temp, "-system", NULL);
+					break;
+				}
+
+				if(Error == 1 || Error == 2)
+				{
+					sprintf(temp,"err, readdb (%d), %d", Error, ErrorCode );
+					break;
+				}
+
+				//ProcessDBMessage(Msg);
+			}
+		} break;
+
+		case WSA_ACCEPT:
+		{
+			//0042DEDE
+			if(WSAGETSELECTERROR(lParam) == 0) 
+			{
+				int User = 0;//GetEmptyUser();
+				if(User == 0)
+				{
+					//Log("err, accept fail - no empty", "-system", NULL);
+					break;
+				}
+
+				int ret = pUser[User].AcceptUser(ListenSocket.Sock);
+				if(ret == FALSE) //Adicionado chacagem de proteção
+				{
+					//Log("err, WSA_ACCEPT fail", "-system", NULL);
+					return TRUE;
+				}
+
+				if(ServerDown != -1000)
+				{
+					//SendClientMessage(User, g_pMessageStringTable[_ServerReboot_Cant_Connect]);
+					//CloseUser(User);  
+					return TRUE;
+				}
+			}
+			else
+			{
+				//Log("err, - accept - wsagetselecterror", "-system", NULL);
+			}
+		} break;
+
+		case WSA_READBILL:
+		{
+			//0042D607
+			if(WSAGETSELECTEVENT(lParam) != FD_READ)
+  	        {
+				//Log("err, Billing Connection lost.", "-system", NULL);
+				BillServerSocket.CloseSocket();
+				BillCounter = 360;
+
+				//Log("err, billing disconected.", "-system", NULL);
+				return TRUE;
+            }
+
+			//0042D65B
+			int ret = BillServerSocket.Receive();
+			if(ret != TRUE)
+			{
+				//Log("err, bill receive fail", "-system", NULL);
+				BillServerSocket.CloseSocket();
+				BillCounter = 360;
+				return TRUE;
+			}
+			
+			if(ret == FALSE)
+			{
+				ret = WSAGetLastError();
+				sprintf(temp, "err, socket %d %d-%d-%d", ret, BillServerSocket.nRecvPosition, BillServerSocket.nProcPosition, BillServerSocket.nSendPosition);
+
+				ret = BillServerSocket.Receive();
+				if(ret != TRUE)
+				{
+					//Log("err, bill receive retry_recv fail", "-system", NULL);
+					BillServerSocket.CloseSocket();
+					BillCounter = 360;
+					break;
+				}
+			}
+			
+			if(ret == -1)
+			{
+				sprintf(temp, "clo, bill receive %d-%d-%d", BillServerSocket.nRecvPosition, BillServerSocket.nProcPosition, BillServerSocket.nSendPosition);
+				//Log(temp, "-system", NULL);
+
+				int receive = recv(BillServerSocket.Sock, BillServerSocket.pRecvBuffer, RECV_BUFFER_SIZE, NULL);
+				BillServerSocket.CloseSocket();
+				BillCounter = 360;
+				break;
+			}
+
+			//0042D78F
+			int Error = FALSE;
+			int ErrorCode = FALSE;
+            while(TRUE)
+			{
+				char* Msg = BillServerSocket.ReadBillMessage(&Error, &ErrorCode);
+				if(Msg == NULL)
+					break;
+
+				if(Error == 1 || Error == 2)
+				{
+					sprintf(temp, "err, readbill (%d), %d", Error, ErrorCode);
+					//Log(temp, "-system", 0);
+					break;
+				}
+
+				//ProcessBILLMessage(Msg);
+			}
+		} break;
+
+		case WSA_READ:
+		{
+			//0042DB4F
+			int User = 0;//GetUserFromSocket(wParam);  
+	        if(User == 0)
+			{
+				closesocket(wParam);
+				break;
+			}
+
+			//0042DB72
+			if(WSAGETSELECTEVENT(lParam) != FD_READ)
+			{
+				//0042DB7F
+				sprintf(temp, "clo, fd %d-%d", pUser[User].Mode, pMob[User].Mode);
+				//Log(temp, pUser[User].AccountName, pUser[User].IP);
+
+				//CloseUser(User);
+				closesocket(wParam); //adicionado para finalizar o socket em caso de erro.
+				break;
+			}
+
+			//0042DBEF
+			int ret = pUser[User].cSock.Receive();
+			if(ret == FALSE)
+			{
+				ret = WSAGetLastError();
+				sprintf(temp, "err, socket %d %d-%d-%d %d-%d", ret, pUser[User].cSock.nRecvPosition, pUser[User].cSock.nProcPosition, pUser[User].cSock.nSendPosition, pUser[User].Mode, pMob[User].Mode);
+
+				ret = pUser[User].cSock.Receive();
+				if(ret != TRUE)
+				{
+					//Log("err, retry_recv fail", pUser[User].AccountName, pUser[User].IP);
+					//CloseUser(User);
+					closesocket(wParam); //adicionado para finalizar o socket em caso de erro.
+					break;
+				}
+			}
+			else if(ret == -1) //0042DCDE
+			{
+				sprintf(temp, "clo, receive %d-%d-%d %d-%d", pUser[User].cSock.nRecvPosition, pUser[User].cSock.nProcPosition, pUser[User].cSock.nSendPosition, pUser[User].Mode, pMob[User].Mode);
+				//Log(temp, "clo, receive", pUser[User].AccountName, pUser[User].IP);
+
+				int receive = recv(pUser[User].cSock.Sock, pUser[User].cSock.pRecvBuffer, RECV_BUFFER_SIZE, NULL);
+				//CloseUser(User);
+				closesocket(wParam); //adicionado para finalizar o socket em caso de erro.
+				break;
+			}
+
+			int Error = FALSE;
+			int ErrorCode = FALSE;
+            while(TRUE)
+			{ 
+				char* Msg = pUser[User].cSock.ReadMessage(&Error, &ErrorCode);
+				if(Msg == NULL)
+					break;
+
+				MSG_STANDARD* CheckPacket = (MSG_STANDARD*)Msg;
+				if(Msg != NULL && BASE_CheckPacket(CheckPacket))
+				{
+					sprintf(temp, "**PACKET_DEBUG** PacketID:%d Size:%d", CheckPacket->Header.PacketId, CheckPacket->Header.Size);
+					//Log(temp, "-system", NULL);
+				}
+
+				if(Error == 1 || Error == 2)
+				{
+					pUser[User].AccountName[ACCOUNTNAME_LENGTH - 1] = 0;
+					pUser[User].AccountName[ACCOUNTNAME_LENGTH - 2] = 0;
+					sprintf(temp, "err, read (%d), %d", Error, ErrorCode);
+					//Log(temp, pUser[User].AccountName, pUser[User].IP);
+					break;
+				}
+
+				//0042DEC4
+				//ProcessClientMessage(User, Msg);
+			}
+		} break;
+
+		case WM_PAINT:
+		{
+			//0042DF82
+			PAINTSTRUCT ps;
+			BeginPaint(hWnd, &ps);
+			//DrawConfg(0);
+			EndPaint(hWnd, &ps);
+		} break;
+
+		case WM_CLOSE:
+		{
+			//0042DFC5
+			if(BILLING != 0)
+			{
+				_AUTH_GAME sm;
+				memset(&sm, 0, sizeof sm);
+				//SendBilling2(&sm, _Msg_BillLogin);
+				BILLING = 0;
+			}
+
+			//WriteGuild();
+			if(fLogFile != 0)
+				fclose(fLogFile);
+
+			if(hFont != 0)
+			{
+				DeleteObject(hFont);
+				hFont = NULL;
+			}
+
+			DefWindowProc(hWnd, message, wParam, lParam);
+		} break;
+
+		case WM_DESTROY:
+		{
+			WSACleanup();
+			PostQuitMessage(0);
+		} break;
+
+		default: 
+			return(DefWindowProc(hWnd, message, wParam, lParam));
+		break;
+	}
+
+	return EXIT_SUCCESS;
+}

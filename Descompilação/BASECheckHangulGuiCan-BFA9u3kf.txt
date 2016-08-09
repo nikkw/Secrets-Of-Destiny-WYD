@@ -1,0 +1,9 @@
+bool BASE_CheckHangul(unsigned short word) //00405aa0 - ok
+{   
+	 unsigned char x = (unsigned char)word;
+	 unsigned char y = (unsigned char)(word >> 8);
+	 if(x >= 176 && x <= 201 && y >= 161 && y <= 255)
+		 return true;
+	 else
+		 return false;
+}

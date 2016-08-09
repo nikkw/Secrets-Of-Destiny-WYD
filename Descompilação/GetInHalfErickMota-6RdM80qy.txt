@@ -1,0 +1,10 @@
+int GetInHalf(int cId1, int cId2)
+{
+	// 0x00401159
+
+	if(cMob[cId1].Target.X >= (cMob[cId2].Target.X - 0xB) && cMob[cId1].Target.X <= (cMob[cId2].Target.X + 0xB)
+	&& cMob[cId1].Target.Y >= (cMob[cId2].Target.Y - 0xB) && cMob[cId1].Target.Y <= (cMob[cId2].Target.Y + 0xB))
+		return 1;
+	
+	return -1;
+}

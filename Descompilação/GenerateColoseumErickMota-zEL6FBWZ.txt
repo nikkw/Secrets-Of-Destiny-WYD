@@ -1,0 +1,9 @@
+void GenerateColoseum(int arg1)
+{
+	// 0x0040142E
+	int LOCAL_1 = (Rand() & 80000003) + 4,
+		LOCAL_2 = 0;
+
+	for(; LOCAL_2 < LOCAL_1; LOCAL_2++)
+		GenerateMob(arg1, 0, 0);
+}

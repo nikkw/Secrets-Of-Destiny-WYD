@@ -1,0 +1,18 @@
+
+void DoRemoveHide(int clientId)
+{  // 00461CB0
+	if(clientId <= 0 || clientId >= MAX_PLAYER)
+		return;
+
+	for(int LOCAL_1 = 0; LOCAL_1 < 4; LOCAL_1 ++) // MAX_AFFECT
+	{
+		if(CMob[clientId].Affects[LOCAL_1].Index == 28)
+		{
+			CMob[clientId].Affects[LOCAL_1].Index = 0;
+
+			GetCurrentScore(clientId);	 // MOV ECX
+			SendScore(clientId);
+			break;
+		}
+	}
+}

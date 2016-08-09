@@ -1,0 +1,42 @@
+BOOL BASE_CanTrade(STRUCT_ITEM* Inven, STRUCT_ITEM* MyTrade, unsigned char* nCount, STRUCT_ITEM* OpponentTrade) //00409b50 - terminar
+{
+	int InvBuffer[MAX_INVEN];
+	memcpy(InvBuffer, OpponentTrade, MAX_INVEN);
+	memcpy(Inven, MyTrade, 512);
+
+	int i;
+	for(i = 0; i < MAX_TRADE; i++)
+	{
+		int NewCount = (int)nCount + i;
+		if(NewCount == -1)
+			continue;
+
+		BASE_ClearItem(&Inven[NewCount]);
+	}
+
+	BASE_SortTradeItem((STRUCT_ITEM*)InvBuffer, EF_GRID);
+	for(i = 0; i < MAX_TRADE; i++)
+	{
+		if((STRUCT_ITEM*)InvBuffer[i] == 0)
+			continue;
+
+		for(int j = 0; j < MAX_INVEN; j++)
+		{
+			int pX = j % 9;
+			int pY = j / 9;
+			int error = -2;
+			int CanCarry = BASE_CanCarry(&InvBuffer[i], Inven, pX, pY, &error);
+			if(CanCarry != 1)
+				continue;
+
+			Inven[j] = *(STRUCT_ITEM*)InvBuffer[i];
+			//00409C79
+		}
+	}
+
+
+
+
+	
+	return TRUE;
+}

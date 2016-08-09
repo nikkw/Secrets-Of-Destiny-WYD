@@ -1,0 +1,9 @@
+INT32 GetManaSpent(INT32 skillId, INT32 saveMana, INT32 mastery)
+{
+	INT32 manaSpent = SkillData[skillId].Mana; // -4
+
+	manaSpent = (((mastery >> 1) + 100) * manaSpent) / 100;
+	manaSpent = ((100 - saveMana) * manaSpent) / 100;
+
+	return manaSpent;
+}

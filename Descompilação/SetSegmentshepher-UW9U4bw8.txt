@@ -1,0 +1,132 @@
+int SetSegment(int clientId) // VEM DE ECX, NÃO TEM ARGUMENTOS
+{
+	st_Mob *mob = &CMob[clientId];	
+	if(mob->RouteType == 6) // 320h - 800
+	{
+		mob->Segment.Progress = 0; // 3BC
+		mob->Segment.Direction = 0; // 3B8
+		
+		mob->Segment.X = mob->Segment.ListX[mob->Segment.Progress];
+		mob->Segment.Y = mob->Segment.ListY[mob->Segment.Progress];
+
+		mob->WaitSec = 0;
+
+		return 0;
+	}
+
+	if(mob->RouteType < 0 || mob->RouteType > 4)
+	{
+		BASE_Log("Wrong SetSegment", mob->Name, 0);
+
+		return 0;
+	}
+
+	INT32 LOCAL_2 = 0;
+	while(1)
+	{
+		if(!mob->Segment.Direction)
+			mob->Segment.Progress ++;
+		else
+			mob->Segment.Progress --;
+
+		if(mob->Segment.Progress <= -1)
+		{
+			if(mob->RouteType == 0)
+			{
+				mob->Segment.Progress = 0; // 3BC
+				mob->Segment.Direction = 0; // 3B8
+
+				LOCAL_2 = 2;
+				break;
+			}
+			else if(mob->RouteType == 1)
+			{
+				mob->Segment.Progress = 0; // 3BC
+				mob->Segment.Direction = 0; // 3B8
+
+				break;
+			}
+			else if(mob->RouteType == 2)
+			{
+				mob->Segment.Progress = 0; // 3BC
+				mob->Segment.Direction = 0; // 3B8
+
+				break;
+			}
+			else if(mob->RouteType == 3)
+			{
+				LOCAL_2 = 2;
+				break;
+			}
+			else if(mob->RouteType == 4)
+			{
+				BASE_Log("SetSegment SegmentProgress -1 but route type 4", mob->Name, 0);
+
+				break;
+			}
+		}
+		else if(mob->Segment.Progress >= 5)
+		{
+			if(mob->RouteType == 0)
+			{
+				mob->Segment.Progress = 4;
+				mob->Mode = 4;
+
+				mob->bStatus.Merchant.Merchant = mob->Info.Merchant;
+				INT32 LOCAL_3 = strlen((char*)mob->Route);
+
+				char LOCAL_4 = 0; //EBP-10;
+
+				if(LOCAL_3 > 0)
+				{
+					LOCAL_4 = mob->Route[(LOCAL_3 - 1)]; // No caso, ele usa o final da Next, não sei como ele faz isso, mas enfim!
+					LOCAL_4 = LOCAL_4 - 48;
+
+					if(LOCAL_4 >= 1 && LOCAL_4 <= 9)
+					{
+						LOCAL_4 = LOCAL_4 << 4;
+
+						mob->bStatus.Merchant.Direction =  mob->bStatus.Merchant.Direction | LOCAL_4;
+					}
+
+					GetCurrentScore(clientId); // Na verdade, PUSH 064h, MOV ECX
+					LOCAL_2 = 1;
+
+					break;
+				}
+			}
+			else if(mob->RouteType == 1)
+			{
+				LOCAL_2 = 2;
+				break;
+			}
+			else if(mob->RouteType == 2 || mob->RouteType == 3)
+			{
+				mob->Segment.Progress = 4; // 3BC
+				mob->Segment.Direction = 1; // 3B8
+				
+				break;
+			}
+			else if(mob->RouteType == 4)
+			{
+				mob->Segment.Progress = -1;
+				break;
+			}
+		}
+		else 
+		{
+			if(mob->Segment.ListX[mob->Segment.Progress] == 0)
+				continue;
+
+			LOCAL_2 = 0;
+			break;
+		}
+	}
+	
+	mob->Segment.X = mob->Segment.ListX[mob->Segment.Progress];
+	mob->Segment.Y = mob->Segment.ListY[mob->Segment.Progress];
+
+	mob->WaitSec = 0;
+
+	return LOCAL_2;
+}

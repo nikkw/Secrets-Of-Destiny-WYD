@@ -1,0 +1,27 @@
+int GetEmptyNPCMob()
+{ // 4591D0
+	static int g_EmptyMob; // 1.2 = 4C7BE0  -  1.7 = 4CBBE4
+	if(g_EmptyMob >= 30000)
+		g_EmptyMob = 100; // MAX_PLAYER
+
+	INT32 LOCAL_1 = 29900;
+	INT32 LOCAL_2 = g_EmptyMob;
+
+	for(INT32 LOCAL_3 = 0; LOCAL_3 < LOCAL_1; LOCAL_3++, LOCAL_2++)
+	{
+		if(LOCAL_2 >= 30000)
+		{
+			LOCAL_2 = 100; // MAX_PLAYER
+			continue;
+		}
+
+		if(CMob[LOCAL_2].Mode == 0)
+		{
+			g_EmptyMob = LOCAL_2;
+
+			return LOCAL_2;
+		}
+	}
+
+	return 0;
+}

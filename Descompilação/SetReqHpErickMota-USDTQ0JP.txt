@@ -1,0 +1,13 @@
+void SetReqHp(int Cid)
+{
+        //0x00401492
+ 
+        if(Cid <= 0 || Cid >= 100)
+                return;
+ 
+        if(CMob[LOCAL_1].Status.curHP > CMob[LOCAL_1].Status.maxHP)
+                CMob[LOCAL_1].Status.curHP = CMob[LOCAL_1].Status.maxHP;
+ 
+        if(Users[Cid].Potion.CountHp < CMob[LOCAL_1].Status.curHP)
+                Users[Cid].Potion.CountHp = CMob[LOCAL_1].Status.curHP;
+}

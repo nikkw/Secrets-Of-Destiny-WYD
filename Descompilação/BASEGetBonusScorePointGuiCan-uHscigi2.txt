@@ -1,0 +1,24 @@
+int BASE_GetBonusScorePoint(STRUCT_MOB* mob) //00401fc0 - ok
+{
+	int clsInfo = mob->ClassInfo;
+	if(clsInfo < 0 || clsInfo > 3)
+		return FALSE;
+
+	int decStr = mob->BaseScore.STR - BaseSIDCHM[clsInfo][1];
+	int decInt = mob->BaseScore.INT - BaseSIDCHM[clsInfo][2];
+	int decDes = mob->BaseScore.DEX - BaseSIDCHM[clsInfo][3];
+	int decCon = mob->BaseScore.CON - BaseSIDCHM[clsInfo][4];
+
+	int calcDecs = decStr + decInt + decDes + decCon;
+	int lvl = mob->BaseScore.Level;
+	int calcPts = lvl * 5;
+	if(lvl >= 254)
+		calcPts = calcPts + ((lvl - 254) * 5);
+
+	if(lvl >= 299)
+		calcPts = calcPts + ((lvl - 299) * 10);
+
+	mob->StatusPoint = calcPts - calcDecs;
+
+	return TRUE;
+}

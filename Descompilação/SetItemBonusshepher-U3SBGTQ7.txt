@@ -1,0 +1,667 @@
+// Função já testada num emulador e funcional.
+// Estes static são buffers usados no SetItemBonus
+
+void SetItemBonus(st_Item *item, int level, int sanc, int bonus)
+{
+	static const DWORD dwValue[0xA] = {0x04, 0x36, 0x0B, 0x0C, 0x0D, 0x0E, 0x07,
+		0x08, 0x09, 0xA};
+
+	INT32 LOCAL_1 = bonus >> 3;
+	
+	if(LOCAL_1 < 0)
+		LOCAL_1 = 0;
+
+	if(LOCAL_1 > 2)
+		LOCAL_1 = 2;
+
+	INT32 LOCAL_2 = -1;
+	INT32 LOCAL_3 = -1;
+
+	if(item->EF1 >= 100)
+	{
+		if(item->EF1 <= 0x69)
+		{
+			LOCAL_2 = item->EF1 - 0x64;
+			LOCAL_3 = item->EFV1;
+
+			item->EF1 = 0;
+			item->EFV1 = 0;
+		}
+	}
+	//	004443B2  |> C705 9C17BF08 >MOV DWORD PTR DS:[8BF179C],0
+	//	004443BC  |. C705 9817BF08 >MOV DWORD PTR DS:[8BF1798],0
+
+	if(!sanc)
+		if(level > 0xD2)
+			level -= 0x2F;
+
+	int LOCAL_4 = item->Index;
+	int LOCAL_5 = ItemList[item->Index].Unique;
+	int LOCAL_6 = ItemList[item->Index].Level; // LEVEL
+	int LOCAL_7 = ItemList[item->Index].Pos;
+
+	int LOCAL_8 = (level - LOCAL_6) / 0x19;
+
+	if(LOCAL_2 != -1)
+		LOCAL_8 = LOCAL_2;
+	//0044443D  |. A3 B4695C01    MOV DWORD PTR DS:[15C69B4],EAX
+
+	int LOCAL_9 = 0;
+
+	if(LOCAL_8 >= 4)
+		LOCAL_9 = 1;
+
+	if(LOCAL_8 < 0)
+		LOCAL_8 = 0;
+
+	if(LOCAL_8 > 3)
+		LOCAL_8 = 3;
+
+	if(sanc != 0)
+		if(LOCAL_8 >= 3)
+			LOCAL_8 = 3;
+
+	if((LOCAL_7 & 0xFE))
+	{
+		if(!item->EF1 && LOCAL_8 != 0x80)
+		{
+			int LOCAL_10 = 0x3B;
+			int LOCAL_11 = 0;
+			int LOCAL_12 = 0;
+			
+			int LOCAL_13 = Rand() % 0x65;
+
+			int LOCAL_14 = 0x64;
+			if(sanc != 0)
+				LOCAL_14 = LOCAL_13 % 3;
+			else if(LOCAL_8 == 0)
+				LOCAL_14 = (8 - LOCAL_1) % LOCAL_13;
+			else if(LOCAL_8 == 1)
+				LOCAL_14 = (6 - LOCAL_1) % LOCAL_13;
+			else if(LOCAL_8 == 2)
+				LOCAL_14 = (6 - LOCAL_1) % LOCAL_13;
+			else if(LOCAL_8 > 3)
+				LOCAL_14 = LOCAL_13 & 0x80000003;
+			if(LOCAL_7 == 2)
+			{
+				if(LOCAL_14 == 0x00)
+				{
+					LOCAL_10 = 0x1A;
+					LOCAL_12 = 0x03;
+				}
+				else if(LOCAL_14 == 0x01)
+				{
+					LOCAL_10 = 0x3C;
+					LOCAL_12 = 0x2;
+				}
+			}
+			else if(LOCAL_7 == 0x04)
+			{
+				LOCAL_10 = 0x47;
+				LOCAL_12 = 0x0A;
+				LOCAL_11 = 0x01;
+			}
+			else if(LOCAL_7 == 0x08)
+			{
+				LOCAL_10 = 0x47;
+				LOCAL_12 = 0x0A;
+				LOCAL_11 = 0x01;
+			}
+			else if(LOCAL_7 == 0x10)
+			{
+				LOCAL_10 = 0x48;
+				LOCAL_12 = 0x05;
+			}
+			else if(LOCAL_7 == 0x20)
+			{
+				LOCAL_10 = 0x49;
+				LOCAL_12 = 0x06;
+				LOCAL_11 = -1;
+			}
+			else if(LOCAL_7 != 0x40 || LOCAL_7 != 0x2C)
+			{
+				if(LOCAL_5 != 0x2C && LOCAL_5 != 0x2F)
+				{
+					switch(LOCAL_14)
+					{
+						case 0:
+							LOCAL_10 = 0x3C;
+							LOCAL_12 = 0x04;
+							LOCAL_11 = -1;
+							break;
+						case 1:
+							LOCAL_10 = 0x4A;
+							LOCAL_12 = 0x03;
+							LOCAL_11 = -1;
+							break;
+					}
+				}
+				else if(LOCAL_14 == 0)
+				{
+					LOCAL_10 = 0x1A;
+					LOCAL_12 = 0x03;
+					LOCAL_11 = 1;
+				}
+				else if(LOCAL_14 == 1) 
+				{
+					LOCAL_10 = 0x02;
+					LOCAL_12 = 0x09;
+					LOCAL_11 = -1;
+				}
+				else if(LOCAL_14 == 2)
+				{
+					LOCAL_10 = 0x4A;
+					LOCAL_12 = 0x03;
+				}
+			}
+			int LOCAL_15 = Rand() % 0x64;
+			if(sanc != 0)
+				LOCAL_15 = (LOCAL_15 << 1) / 3;
+
+			int LOCAL_16 = 0x64;
+
+			if(sanc != 0)
+				LOCAL_16 = LOCAL_15 & 0x80000003;
+			else if(LOCAL_8 == 0)
+				LOCAL_15 = LOCAL_15 & 0x80000003;
+			else if(LOCAL_8 == 1 || LOCAL_8 == 2)
+				LOCAL_16 = LOCAL_15 % 6;
+			else if(LOCAL_8 >= 3)
+				LOCAL_16 = LOCAL_15 & 0x80000003;
+
+			int LOCAL_17 = 0x3B;
+			int LOCAL_18 = 0x00;
+			int LOCAL_19 = 0x00;
+
+			switch(LOCAL_7)
+			{
+				case 2:
+					if(LOCAL_16 == 0)
+					{
+						LOCAL_17 = 0x04;
+						LOCAL_18 = 0x0A;
+					}
+					else if(LOCAL_16 == 1)
+					{
+						LOCAL_17 = 0x03;
+						LOCAL_18 = 0x05;
+						LOCAL_19 = -1;
+					}
+					break;
+				case 4:
+				case 8:
+					if(LOCAL_16 == 0)
+					{
+						LOCAL_17 = 0x3C;
+						LOCAL_18 = 0x02;
+						LOCAL_19 = -1;
+					}
+					else if(LOCAL_16 == 1)
+					{
+						LOCAL_17 = 0x02;
+						LOCAL_18 = 0x06;
+						LOCAL_19 = -1;
+					}
+					else if(LOCAL_16 == 2)
+					{
+						LOCAL_17 = 0x03;
+						LOCAL_18 = 0x05;
+						LOCAL_19 = -1;
+					}
+					break;
+				case 0x10:
+					if(LOCAL_16 == 0)
+					{
+						LOCAL_17 = 0x3C;
+						LOCAL_18 = 0x02;
+						LOCAL_19 = -1;
+					}
+					else if(LOCAL_16 == 1)
+					{
+						LOCAL_17 = 0x02;
+						LOCAL_18 = 0x06;
+						LOCAL_19 = -1;
+					}
+					else if(LOCAL_16 == 2)
+					{
+						LOCAL_17 = 0x4A;
+						LOCAL_18 = 0x03;
+					}
+					else if(LOCAL_17 == 3)
+					{
+						LOCAL_17 = 0x36;
+						LOCAL_18 = 0x03;
+					}
+					break;
+				case 0x20:
+					if(LOCAL_16 == 0)
+					{
+						LOCAL_17 = 0x3C;
+						LOCAL_18 = 0x02;
+						LOCAL_19 = -1;
+					}
+					else if(LOCAL_16 == 1)
+					{
+						LOCAL_17 = 0x4A;
+						LOCAL_18 = 0x03;
+					}
+					break;
+				case 0x40:
+				case 0x80:
+				case 0xC0:
+					if(LOCAL_5 != 0x2C && LOCAL_5 != 0x2F)
+					{
+						if(LOCAL_16 == 0)
+						{
+							LOCAL_17 = 0x3C;
+							LOCAL_18 = 0x04;
+							LOCAL_19 = -1;
+						}
+						else if(LOCAL_16 == 1)
+						{
+							LOCAL_17 = 0x4A;
+							LOCAL_18 = 0x03;
+							LOCAL_19 = 1;
+						}
+					}
+					else
+					{
+						if(LOCAL_16 == 0)
+						{
+							LOCAL_17 = 0x1A;
+							LOCAL_18 = 0x03;
+							LOCAL_19 = 0x01;
+						}
+						else if(LOCAL_16 == 1)
+						{
+							LOCAL_17 = 0x02;
+							LOCAL_18 = 0x09;
+							LOCAL_19 = -1;
+						}
+						else if(LOCAL_16 == 2)
+						{
+							LOCAL_17 = 0x4A;
+							LOCAL_18 = 0x03;
+							LOCAL_19 = 0x01;
+						}
+					}
+					break;
+			}
+			int LOCAL_20 = 0;
+
+			LOCAL_13 = rand () % 0x64;
+
+			if(LOCAL_8 == 0)
+			{
+				if(LOCAL_13 < 0x02)
+					LOCAL_20 = 0x04;
+				else if(LOCAL_13 < 0x06)
+					LOCAL_20 = 0x03;
+				else if(LOCAL_13 < 0x18)
+					LOCAL_20 = 0x02;
+				else if(LOCAL_13 < 0x037)
+					LOCAL_20 = 0x01;
+				else 
+					LOCAL_20 = 0x00;
+			}
+			else if(LOCAL_8 == 1)
+			{
+				if(LOCAL_13 < 0x01)
+					LOCAL_20 = 0x05;
+				else if(LOCAL_13 < 0x05)
+					LOCAL_20 = 0x04;
+				else if(LOCAL_13 < 0x18)
+					LOCAL_20 = 0x03;
+				else if(LOCAL_13 < 0x41)
+					LOCAL_20 = 0x02;
+				else 
+					LOCAL_20 = 0x01;
+			}
+			else if(LOCAL_8 == 2)
+			{
+				if(LOCAL_13 < 0x02)
+					LOCAL_20 = 0x05;
+				else if(LOCAL_13 < 0x10)
+					LOCAL_20 = 0x04;
+				else if(LOCAL_13 < 0x3C)
+					LOCAL_20 = 0x03;
+				else 
+					LOCAL_20 = 0x02;
+			}
+			else if(LOCAL_8 == 3)
+			{
+				if(LOCAL_13 < 0x02)
+					LOCAL_20 = 0x06;
+				else if(LOCAL_13 < 0x09)
+					LOCAL_20 = 0x05;
+				else if(LOCAL_13 < 0x2D)
+					LOCAL_20 = 0x04;
+				else if(LOCAL_13 < 0x4B)
+					LOCAL_20 = 0x03;
+				else 
+					LOCAL_20 = 0x02;
+			}
+			else if(LOCAL_8 >= 4)
+			{
+				if(LOCAL_13 < 0x02)
+					LOCAL_20 = 0x07;
+				else if(LOCAL_13 < 0x0A)
+					LOCAL_20 = 0x06;
+				else if(LOCAL_13 < 0x1E)
+					LOCAL_20 = 0x05;
+				else
+					LOCAL_20 = 0x04;
+			}
+
+			if(LOCAL_9 != 0 && LOCAL_20 < 0x04)
+				LOCAL_20 = 0x04;
+
+			LOCAL_20 += LOCAL_11;
+
+			if(sanc != 0 && LOCAL_20 == 0)
+				LOCAL_20 = 1;
+
+			if(!item->EF2 && LOCAL_20 > 0)
+			{
+				// EBP - 28 = LOCAL_10
+				item->EF2 = LOCAL_10;
+
+				item->EFV2 = LOCAL_20 * LOCAL_12;
+			}
+			else if(!item->EF2 && LOCAL_20 <= 0 && LOCAL_7 == 0x20)
+			{
+				item->EF2 = LOCAL_10;
+
+				item->EFV2 = 0;
+			}
+			else if(!item->EF2)
+			{
+				item->EF2 = 0x3B;
+				item->EFV2 = Rand() % 0x7F;
+			}
+
+			*(DWORD*)0x008BF179C = LOCAL_20;
+
+			int LOCAL_21 = 0;
+
+			LOCAL_15 = Rand() % 0x64;
+
+			if(LOCAL_8 == 0)
+			{
+				if(LOCAL_15 < 0x02)
+					LOCAL_21 = 0x04;
+				else if(LOCAL_15 < 0x06)
+					LOCAL_21 = 0x03;
+				else if(LOCAL_15 < 0x18)
+					LOCAL_21 = 0x02;
+				else if(LOCAL_15 < 0x037)
+					LOCAL_21 = 0x01;
+				else 
+					LOCAL_21 = 0x00;
+			}
+			else if(LOCAL_8 == 1)
+			{
+				if(LOCAL_15 < 0x01)
+					LOCAL_21 = 0x05;
+				else if(LOCAL_15 < 0x05)
+					LOCAL_21 = 0x04;
+				else if(LOCAL_15 < 0x18)
+					LOCAL_21 = 0x03;
+				else if(LOCAL_15 < 0x41)
+					LOCAL_21 = 0x02;
+				else 
+					LOCAL_21 = 0x01;
+			}
+			else if(LOCAL_8 == 2)
+			{
+				if(LOCAL_15 < 0x02)
+					LOCAL_21 = 0x05;
+				else if(LOCAL_15 < 0x10)
+					LOCAL_21 = 0x04;
+				else if(LOCAL_15 < 0x3C)
+					LOCAL_21 = 0x03;
+				else 
+					LOCAL_21 = 0x02;
+			}
+			else if(LOCAL_8 == 3)
+			{
+				if(LOCAL_15 < 0x02)
+					LOCAL_21 = 0x06;
+				else if(LOCAL_15 < 0x09)
+					LOCAL_21 = 0x05;
+				else if(LOCAL_15 < 0x2D)
+					LOCAL_21 = 0x04;
+				else if(LOCAL_15 < 0x4B)
+					LOCAL_21 = 0x03;
+				else 
+					LOCAL_21 = 0x02;
+			}
+			else if(LOCAL_8 >= 4)
+			{
+				if(LOCAL_15 < 0x02)
+					LOCAL_21 = 0x07;
+				else if(LOCAL_15 < 0x0A)
+					LOCAL_21 = 0x06;
+				else if(LOCAL_15 < 0x1E)
+					LOCAL_21 = 0x05;
+				else if(LOCAL_15 < 0x4B)
+					LOCAL_21 = 0x04;
+				else
+					LOCAL_21 = 0x03;
+			}
+
+			if(LOCAL_9 != 0x00 && LOCAL_21 < 0x03)
+				LOCAL_21 = 0x03;
+
+			if(sanc != 0 && LOCAL_21 >= 0x05)
+				LOCAL_21 = 0x04;
+
+			LOCAL_21 += LOCAL_19;
+
+			if(LOCAL_1 != 0 && LOCAL_21 == 0)
+				LOCAL_21 = LOCAL_1;
+
+			if(sanc != 0 && LOCAL_21 == 0)
+				LOCAL_21 = 0x01;
+
+			if(LOCAL_21 > 0x00 && !item->EF3)
+			{
+				item->EF3 = LOCAL_17;
+				item->EFV3 = LOCAL_21 * LOCAL_18;
+			}
+			else if(!item->EF3)
+			{
+				item->EF3 = 0x3B;
+				item->EFV3 = Rand() % 0x7F;
+			}
+			
+			*(DWORD*)0x8BF1798 = LOCAL_21;
+
+			if(!item->EF1)
+			{
+				int LOCAL_22 = Rand() % 0x064;
+
+				if(sanc != 0)
+					LOCAL_22 >>= 1;
+
+				int LOCAL_23 = 0x01;
+				int LOCAL_24 = 0x0C;
+				int LOCAL_25 = 0x2D;
+				int LOCAL_26 = 0x46;
+
+				if(LOCAL_8 >= 0x03 || LOCAL_8 == 0x02)
+				{
+					LOCAL_23 = 0x06;
+					LOCAL_24 = 0x23;
+					LOCAL_25 = 0x46;
+					LOCAL_25 = 0x55;
+					LOCAL_26 = 0x64;
+				}
+				if(LOCAL_8 == 0x01 || LOCAL_8 == 0x0)
+				{
+					LOCAL_23 = 0x06;
+					LOCAL_24 = 0x16;
+					LOCAL_25 = 0x37;
+					LOCAL_25 = 0x4B;
+					LOCAL_26 = 0x5A;
+				}
+
+				if(LOCAL_22 < LOCAL_23)
+				{
+					item->EF1 = 0x2B;
+					item->EFV1 = 0x02;
+
+					if(LOCAL_3 > 0x02)
+					{
+						int LOCAL_27 = Rand() % 0x64;
+
+						if(LOCAL_3 == 0x03)
+						{
+							if(LOCAL_27 < 0x1E)
+								item->EFV1 = 0x03;
+						}
+						else if(LOCAL_3 == 0x04)
+						{
+							if(LOCAL_27 < 0x0A)
+								item->EFV1 = 0x04;
+							else if(LOCAL_27 < 0x28)
+								item->EFV1 = 0x03;
+						}
+						else if(LOCAL_3 == 0x05)
+						{
+							if(LOCAL_27 < 0xA)
+								item->EFV1 = 0x05;
+							else if(LOCAL_27 < 0x1E)
+								item->EFV1 = 0x04;
+							else if(LOCAL_27 < 0x3C)
+								item->EFV1 = 0x03;
+						}
+						else if(LOCAL_3 == 0x06)
+						{
+							if(LOCAL_27 < 0x0A)
+								item->EFV1  = 0x06;
+							else if(LOCAL_27 < 0x14)
+								item->EFV1 = 0x05;
+							else if(LOCAL_27 < 0x28)
+								item->EFV1 = 0x04;
+							else if(LOCAL_27 < 0x3C)
+								item->EFV1 = 0x03;
+						}
+						else if(LOCAL_3 == 0x07)
+						{
+							if(LOCAL_27 < 0x04)
+								item->EFV1 = 0x07;
+							else if(LOCAL_27 < 0x0A)
+								item->EFV1 = 0x06;
+							else if(LOCAL_27 < 0x14)
+								item->EFV1 = 0x05;
+							else if(LOCAL_27 < 0x23)
+								item->EFV1 = 0x04;
+							else if(LOCAL_27 < 0x3C)
+								item->EFV1 = 0x03;
+						}
+					}
+				}
+				else if(LOCAL_22 < LOCAL_24)
+				{
+					item->EF1 = 0x2B;
+					item->EFV1 = 0x01;
+				}
+				else if(LOCAL_22 < LOCAL_25)
+				{
+					item->EF1 = 0x2B;
+					item->EFV1 = 0x00;
+				}
+				else if(LOCAL_22 < LOCAL_26)
+				{
+					int LOCAL_28 = Rand() % 0x0A;
+						
+					int LOCAL_29 = *(DWORD*)(LOCAL_28 *4 + 0x4C9A50);
+
+					int LOCAL_30 = LOCAL_8;
+						
+					int LOCAL_31 = *(DWORD*)(0x4C98C0 + (0x050 * LOCAL_30) + (LOCAL_28 * 8));
+
+					int LOCAL_32 = *(DWORD*)(0x4C98C4 + (0x050 * LOCAL_30) + (LOCAL_28 * 8));
+
+					int LOCAL_33 = LOCAL_32 + 1 - LOCAL_31;
+
+					int LOCAL_34 = Rand() % LOCAL_33 + LOCAL_31;
+
+					item->EF1 = LOCAL_29;
+					item->EFV1 = LOCAL_34;
+				}
+				else
+				{
+					item->EF1 = 0x3B;
+					item->EFV1 = Rand() % 0x7F;
+				}
+			}
+		}
+	}
+
+	int LOCAL_35 = 0;
+	for(LOCAL_35 = 0; LOCAL_35 < 12; LOCAL_35++)
+	{
+		int LOCAL_36 = ItemList[LOCAL_4].Level;
+
+		switch(ItemList[LOCAL_4].Effect[LOCAL_35].Index)
+		{
+			case 0x2B:
+				item->EF1 = 0x2B;
+				item->EFV1 = ItemList[LOCAL_4].Effect[LOCAL_35].Value;
+				break;
+			case 0x3D:
+				item->EF1 = 0x3D;
+				item->EFV1 = ItemList[LOCAL_4].Effect[LOCAL_35].Value;
+				break;
+			case 0x4E:
+				item->EF1 = 0x4E;
+
+				int LOCAL_37 = Rand() % 4 + ItemList[LOCAL_4].Effect[LOCAL_35].Value;
+				if(LOCAL_37 > 9)
+					LOCAL_37 = 9;
+
+				item->EFV1 = LOCAL_37;
+				break;
+		}
+	}
+
+	if(item->Index == 0x19C || item->Index == 0x19D || item->Index == 0x1A3 || item->Index != 0x1A4 || item->Index == 0x2F1)
+	{
+		if(!item->EF1)
+		{
+			item->EF1 = 0x3B;
+			item->EFV1 = Rand() % 0x7F;
+		}
+		if(!item->EF2)
+		{
+			item->EF2 = 0x3B;
+			item->EFV2 = Rand() % 0x7F;
+		}
+		if(!item->EF3)
+		{
+			item->EF3 = 0x3B;
+			item->EFV3 = Rand() % 0x7F;
+		}
+	}
+
+	if((item->Index >= 447 && item->Index <= 450) || (item->Index >= 692 && item->Index <= 695))
+	{
+		if(!item->EF1)
+		{
+			item->EF1 = 0x3B;
+			item->EFV1 = Rand() % 127;
+		}
+		if(!item->EF2)
+		{
+			item->EF2 = 0x3B;
+			item->EFV2 = Rand() % 127;
+		}
+		if(!item->EF3)
+		{
+			item->EF3 = 0x3B;
+			item->EFV3 = Rand() % 127;
+		}
+	}
+}

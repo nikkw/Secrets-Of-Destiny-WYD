@@ -1,0 +1,17 @@
+void BASE_InitModuleDir(void) //00405cf0 - ok
+{
+	char String[256];
+	GetModuleFileName(NULL, String, 256);
+
+	int len = (int)strlen(String);
+	for(int i = len - 1; i > 0; i--)
+	{
+		if(String[i] == '\\')
+		{
+			String[i] = 0;
+			break;
+		}
+	}
+
+	SetCurrentDirectory(String);	
+}

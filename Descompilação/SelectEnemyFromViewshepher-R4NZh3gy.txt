@@ -1,0 +1,103 @@
+// Não tenho certeza se está completa
+
+void SelectEnemyFromEnemyList(int ecx)
+{
+	st_Mob *mob = (st_Mob*)GetMobFromIndex(ecx);/// local1 - ebp - 4
+
+	mob->CurrentTarget = 0;
+
+	int i;
+	int localArray[4];
+	for(i = 0; i < 4; i++)
+	{ // i = local6
+		localArray[i] = 100;
+	}
+
+	int local7 = 6;
+
+	if(mob->CapeInfo == 4 || mob->CapeInfo == 7 || mob->CapeInfo == 8)
+		local7 = 12;
+
+	int local12;
+	if((mob->Target.X >> 7) < 12 && (mob->Target.Y >> 7) > 25)
+		local12 = 1;
+	else
+		local12 = 0;
+
+	if(local12 != 0)
+		local7 = 8;
+
+	for(i = 0; i < 4; i++)
+	{ 
+		int mobId = mob->EnemyList[i];//ebp-20
+		if(mobId <= 0 || mobId >= 30000)
+			continue;
+
+		st_Mob *target = (st_Mob*)GetMobFromIndex(mobId); // pointer, mas na função é usado os address base
+		if(target->Mode == 0)
+		{
+			mob->EnemyList[i] = 0;
+
+			continue;
+		}
+
+		if(target->Status.curHP <= 0)
+		{
+			mob->EnemyList[i] = 0;
+
+			continue;
+		}
+
+		if(mobId < MAX_PLAYER)
+		{
+			if(target->AffectInfo.Snoop) // & 16
+			{
+				mob->EnemyList[i] = 0;
+
+				continue;
+			}
+
+			if(target->bStatus.Level >= 400 && target->Info.Merchant)
+			{
+				mob->EnemyList[i] = 0;
+
+				continue;
+			}
+		}
+
+		if(target->Target.X < (mob->Target.X - local7) && target->Target.X > (mob->Target.X + local7) && mob->Target.Y < (mob->Target.Y - local7) && target->Target.Y > (mob->Target.Y + local7))
+		{
+			mob->EnemyList[i] = 0;
+			continue;
+		}
+		// call 4013AC - >    00411D2B
+
+		localArray [i] = BASE_GetDistance(mob->Target.X, mob->Target.Y, target->Target.X, target->Target.Y);
+		if(mobId > MAX_PLAYER)
+			localArray[i] += 2;
+	}
+
+	int local9 = 100;
+	int local10 = 0;
+
+	for(i = 0; i < 4; i++)
+	{
+		int targetId = mob->EnemyList[i]; // -2c
+		if(!targetId)
+			continue;
+
+		if(local9 >= localArray[i])
+		{
+			local10 = targetId;
+			local9 = localArray[i];
+		}
+	}
+
+	if(local9 == 100)
+	{
+		mob->CurrentTarget = 0;
+		return;
+	}
+	
+	mob->CurrentTarget = local10;
+}

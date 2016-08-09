@@ -1,0 +1,59 @@
+BOOL BASE_CanCargo(STRUCT_ITEM* item, STRUCT_ITEM* cargo, int DestX, int DestY) //00409640 - ok
+{
+	int ItemGrid = BASE_GetItemAbility(item, EF_GRID);
+	
+	unsigned char pGridDest[8];
+	memcpy(pGridDest, g_pItemGrid[ItemGrid], 8);
+
+	unsigned char cargoSlots[MAX_CARGO];
+	memset(cargoSlots, 0, MAX_CARGO);
+
+	for(int i = 0; i < MAX_CARGO; i++)
+    {
+		if(cargo[i].Index == 0)
+            continue;
+
+		ItemGrid = BASE_GetItemAbility(item, EF_GRID);
+
+		unsigned char pGridInv[8];
+	    memcpy(pGridInv, g_pItemGrid[ItemGrid], 8);
+
+		int pInvX = (i % 9);
+        int pInvY = (i / 9);
+		for(int y = 0; y < 4; y++)
+        {
+            for(int x = 0; x < 2; x++)
+            {
+                if(pGridInv[(y * 2) + x] != 1)
+                    continue;
+
+                if((y + pInvY) < 0 || (y + pInvY) >= 14)
+                    continue;
+
+                if((x + pInvX) < 0 || (x + pInvX) >= 9)
+                    continue;
+
+                cargoSlots[(y + pInvY) * 9 + x + pInvX] = (i + 1);
+            }
+        }
+	}
+
+	for(int y = 0; y < 4; y++)
+    {
+        for(int x = 0; x < 2; x++)
+        {
+            if(pGridDest[(y * 2) + x] != 1)
+                continue;
+
+            if((y + DestY) <  0 || (x + DestX) <  0 || (y + DestY) >= 14 || (x + DestX) >= 9)
+                return FALSE;
+
+            if(cargoSlots[(y + DestY) * 9 + x + DestX] != 1)
+                continue;
+
+            return FALSE;
+        }
+    }
+
+	return TRUE;
+}

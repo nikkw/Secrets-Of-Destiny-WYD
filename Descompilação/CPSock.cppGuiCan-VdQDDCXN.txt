@@ -1,0 +1,644 @@
+#include "stdafx.h"
+
+#include <windows.h>
+#include <windowsx.h>
+#include <winsock.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "BaseDef.h"
+#include "CPSock.h"
+
+unsigned char pKeyWord[] = {
+            0x84, 0x87, 0x37, 0xD7, 0xEA, 0x79, 0x91, 0x7D, 0x4B, 0x4B, 0x85, 0x7D, 0x87, 0x81, 0x91, 0x7C,
+            0x0F, 0x73, 0x91, 0x91, 0x87, 0x7D, 0x0D, 0x7D, 0x86, 0x8F, 0x73, 0x0F, 0xE1, 0xDD, 0x85, 0x7D,
+            0x05, 0x7D, 0x85, 0x83, 0x87, 0x9C, 0x85, 0x33, 0x0D, 0xE2, 0x87, 0x19, 0x0F, 0x79, 0x85, 0x86,
+            0x37, 0x7D, 0xD7, 0xDD, 0xE9, 0x7D, 0xD7, 0x7D, 0x85, 0x79, 0x05, 0x7D, 0x0F, 0xE1, 0x87, 0x7E,
+            0x23, 0x87, 0xF5, 0x79, 0x5F, 0xE3, 0x4B, 0x83, 0xA3, 0xA2, 0xAE, 0x0E, 0x14, 0x7D, 0xDE, 0x7E,
+            0x85, 0x7A, 0x85, 0xAF, 0xCD, 0x7D, 0x87, 0xA5, 0x87, 0x7D, 0xE1, 0x7D, 0x88, 0x7D, 0x15, 0x91,
+            0x23, 0x7D, 0x87, 0x7C, 0x0D, 0x7A, 0x85, 0x87, 0x17, 0x7C, 0x85, 0x7D, 0xAC, 0x80, 0xBB, 0x79,
+            0x84, 0x9B, 0x5B, 0xA5, 0xD7, 0x8F, 0x05, 0x0F, 0x85, 0x7E, 0x85, 0x80, 0x85, 0x98, 0xF5, 0x9D,
+            0xA3, 0x1A, 0x0D, 0x19, 0x87, 0x7C, 0x85, 0x7D, 0x84, 0x7D, 0x85, 0x7E, 0xE7, 0x97, 0x0D, 0x0F,
+            0x85, 0x7B, 0xEA, 0x7D, 0xAD, 0x80, 0xAD, 0x7D, 0xB7, 0xAF, 0x0D, 0x7D, 0xE9, 0x3D, 0x85, 0x7D,
+            0x87, 0xB7, 0x23, 0x7D, 0xE7, 0xB7, 0xA3, 0x0C, 0x87, 0x7E, 0x85, 0xA5, 0x7D, 0x76, 0x35, 0xB9,
+            0x0D, 0x6F, 0x23, 0x7D, 0x87, 0x9B, 0x85, 0x0C, 0xE1, 0xA1, 0x0D, 0x7F, 0x87, 0x7D, 0x84, 0x7A,
+            0x84, 0x7B, 0xE1, 0x86, 0xE8, 0x6F, 0xD1, 0x79, 0x85, 0x19, 0x53, 0x95, 0xC3, 0x47, 0x19, 0x7D,
+            0xE7, 0x0C, 0x37, 0x7C, 0x23, 0x7D, 0x85, 0x7D, 0x4B, 0x79, 0x21, 0xA5, 0x87, 0x7D, 0x19, 0x7D,
+            0x0D, 0x7D, 0x15, 0x91, 0x23, 0x7D, 0x87, 0x7C, 0x85, 0x7A, 0x85, 0xAF, 0xCD, 0x7D, 0x87, 0x7D,
+            0xE9, 0x3D, 0x85, 0x7D, 0x15, 0x79, 0x85, 0x7D, 0xC1, 0x7B, 0xEA, 0x7D, 0xB7, 0x7D, 0x85, 0x7D,
+            0x85, 0x7D, 0x0D, 0x7D, 0xE9, 0x73, 0x85, 0x79, 0x05, 0x7D, 0xD7, 0x7D, 0x85, 0xE1, 0xB9, 0xE1,
+            0x0F, 0x65, 0x85, 0x86, 0x2D, 0x7D, 0xD7, 0xDD, 0xA3, 0x8E, 0xE6, 0x7D, 0xDE, 0x7E, 0xAE, 0x0E,
+            0x0F, 0xE1, 0x89, 0x7E, 0x23, 0x7D, 0xF5, 0x79, 0x23, 0xE1, 0x4B, 0x83, 0x0C, 0x0F, 0x85, 0x7B,
+            0x85, 0x7E, 0x8F, 0x80, 0x85, 0x98, 0xF5, 0x7A, 0x85, 0x1A, 0x0D, 0xE1, 0x0F, 0x7C, 0x89, 0x0C,
+            0x85, 0x0B, 0x23, 0x69, 0x87, 0x7B, 0x23, 0x0C, 0x1F, 0xB7, 0x21, 0x7A, 0x88, 0x7E, 0x8F, 0xA5,
+            0x7D, 0x80, 0xB7, 0xB9, 0x18, 0xBF, 0x4B, 0x19, 0x85, 0xA5, 0x91, 0x80, 0x87, 0x81, 0x87, 0x7C,
+            0x0F, 0x73, 0x91, 0x91, 0x84, 0x87, 0x37, 0xD7, 0x86, 0x79, 0xE1, 0xDD, 0x85, 0x7A, 0x73, 0x9B,
+            0x05, 0x7D, 0x0D, 0x83, 0x87, 0x9C, 0x85, 0x33, 0x87, 0x7D, 0x85, 0x0F, 0x87, 0x7D, 0x0D, 0x7D,
+            0xF6, 0x7E, 0x87, 0x7D, 0x88, 0x19, 0x89, 0xF5, 0xD1, 0xDD, 0x85, 0x7D, 0x8B, 0xC3, 0xEA, 0x7A,
+            0xD7, 0xB0, 0x0D, 0x7D, 0x87, 0xA5, 0x87, 0x7C, 0x73, 0x7E, 0x7D, 0x86, 0x87, 0x23, 0x85, 0x10,
+            0xD7, 0xDF, 0xED, 0xA5, 0xE1, 0x7A, 0x85, 0x23, 0xEA, 0x7E, 0x85, 0x98, 0xAD, 0x79, 0x86, 0x7D,
+            0x85, 0x7D, 0xD7, 0x7D, 0xE1, 0x7A, 0xF5, 0x7D, 0x85, 0xB0, 0x2B, 0x37, 0xE1, 0x7A, 0x87, 0x79,
+            0x84, 0x7D, 0x73, 0x73, 0x87, 0x7D, 0x23, 0x7D, 0xE9, 0x7D, 0x85, 0x7E, 0x02, 0x7D, 0xDD, 0x2D,
+            0x87, 0x79, 0xE7, 0x79, 0xAD, 0x7C, 0x23, 0xDA, 0x87, 0x0D, 0x0D, 0x7B, 0xE7, 0x79, 0x9B, 0x7D,
+            0xD7, 0x8F, 0x05, 0x7D, 0x0D, 0x34, 0x8F, 0x7D, 0xAD, 0x87, 0xE9, 0x7C, 0x85, 0x80, 0x85, 0x79,
+            0x8A, 0xC3, 0xE7, 0xA5, 0xE8, 0x6B, 0x0D, 0x74, 0x10, 0x73, 0x33, 0x17, 0x0D, 0x37, 0x21, 0x19
+};
+
+extern HWND hWndMain;
+extern unsigned int CurrentTime;
+extern unsigned int LastSendTime;
+int ConnectPort = 0;
+extern void Log(char* String1, char* String2, unsigned int ip);
+
+//////////////////////////////////////////////////////////////////////////
+//
+//             CPSock,  ~CPSock
+//
+//////////////////////////////////////////////////////////////////////////
+CPSock::CPSock()
+{	
+	Sock = 0;
+	Init = 0;
+	pSendBuffer      = (char *)malloc(SEND_BUFFER_SIZE);
+	pRecvBuffer      = (char *)malloc(RECV_BUFFER_SIZE);
+
+	nSendPosition    = 0;
+	nSentPosition    = 0;
+	nRecvPosition    = 0;
+	nProcPosition    = 0;
+}
+
+CPSock::~CPSock()
+{
+	if(pSendBuffer != NULL)
+		free(pSendBuffer);
+
+	if(pRecvBuffer != NULL)
+		free(pRecvBuffer);
+}
+
+BOOL CPSock::CloseSocket(void)
+{
+	nSendPosition		= 0;
+	nSentPosition		= 0;
+	nRecvPosition		= 0;
+	nProcPosition		= 0;
+	Init				= 0;
+
+    if(Sock != NULL)
+		closesocket(Sock);
+
+	Sock				= 0;
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       WSAInitialize
+//
+/////////////////////////////////////////////////////////////////////////
+BOOL CPSock::WSAInitialize(void)
+{
+	WSADATA WSAData;
+	if(WSAStartup(MAKEWORD(2,2), &WSAData) != 0)
+		return FALSE;
+
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       StartListen
+//
+/////////////////////////////////////////////////////////////////////////
+BOOL CPSock::StartListen(HWND hWnd, int ip, int port, int WSA)
+{
+	SOCKET tSock = socket(AF_INET, SOCK_STREAM, 0);
+	if(tSock == INVALID_SOCKET) 
+	{
+		MessageBox(hWnd, "Initialize socket fail", "ERROR", MB_OK);
+		return FALSE;
+	}
+    
+	SOCKADDR_IN	local_sin;
+	memset(&local_sin, 0, sizeof(local_sin));
+
+	char Temp[256];
+
+	gethostname(Temp, 256);
+	local_sin.sin_family		= AF_INET;
+	local_sin.sin_addr.s_addr	= ip;
+	local_sin.sin_port			= ntohs((unsigned short)port);
+
+	if(bind(tSock, (struct sockaddr FAR *)&local_sin, sizeof(local_sin)) == SOCKET_ERROR)
+	{
+		MessageBox(hWnd, "Binding fail", "ERROR", MB_OK);
+		closesocket(tSock);
+		return FALSE;
+	}
+
+	if(listen(tSock, MAX_PENDING_CONNECTS) < 0)
+	{
+		MessageBox(hWnd, "Listen fail", "ERROR", MB_OK);
+		closesocket(tSock);
+		return FALSE;
+	}
+
+	if(WSAAsyncSelect(tSock, hWnd, WSA, FD_ACCEPT) > 0)
+	{
+		MessageBox(hWnd, "WSAAsyncSelect fail", "ERROR", MB_OK);
+		closesocket(tSock);
+		return FALSE;
+	}
+
+	Sock = tSock;
+	return tSock;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       ConnectServer
+//
+/////////////////////////////////////////////////////////////////////////
+SOCKET CPSock::ConnectServer(char* HostAddr, int Port, int ip, int WSA)
+{
+	SOCKADDR_IN local_sin;
+	memset(&local_sin, 0, sizeof(local_sin));
+
+	SOCKADDR_IN InAddr;
+	memset(&InAddr, 0, sizeof(InAddr));
+
+	nSendPosition = 0;
+	nSentPosition = 0;
+	nRecvPosition = 0;
+	nProcPosition = 0;
+
+	if(Sock != 0)
+		CloseSocket();
+
+	local_sin.sin_addr.s_addr = inet_addr(HostAddr);
+	local_sin.sin_family = AF_INET;
+	local_sin.sin_port = ntohs((unsigned short)Port);
+
+	SOCKET tSock = socket(AF_INET, SOCK_STREAM, 0);
+	if(tSock == INVALID_SOCKET) 
+    {
+		MessageBox(NULL, "Initialize socket fail", "ERROR", MB_OK);
+		return FALSE;
+	}
+
+	// Bind local IP
+    InAddr.sin_family		= AF_INET;
+    InAddr.sin_addr.s_addr	= ip;
+  	InAddr.sin_port			= 0; 
+	if(bind(tSock, (struct sockaddr FAR *)&InAddr, sizeof(InAddr)) == SOCKET_ERROR)
+    {
+		ConnectPort = ConnectPort + 10;
+		InAddr.sin_port = ntohs((unsigned short)(ConnectPort + 5000));
+		if(bind(tSock, (struct sockaddr FAR *)&InAddr, sizeof(InAddr)) == SOCKET_ERROR)
+		{
+			ConnectPort = ConnectPort + 10;
+			InAddr.sin_port = ntohs((unsigned short)(ConnectPort + 5000));
+			if(bind(tSock, (struct sockaddr FAR *)&InAddr, sizeof(InAddr)) == SOCKET_ERROR)
+			{
+				MessageBox(NULL, "Binding fail", "ERROR", MB_OK);
+				closesocket(tSock);
+				return FALSE;
+			}
+		}
+	}
+
+	if(tSock == INVALID_SOCKET)
+		return FALSE;
+
+	// Connect
+	if(connect(tSock, (struct sockaddr FAR *)&local_sin, sizeof(local_sin)) < 0)
+	{
+		closesocket(tSock);
+		Sock = 0;
+		return FALSE;
+	}
+
+	if(WSAAsyncSelect(tSock, hWndMain, WSA, FD_READ | FD_CLOSE) > 0) 
+	{
+		closesocket(tSock);
+		Sock = 0;
+		return FALSE;
+	}
+
+	Sock = tSock;
+
+	unsigned int HelloPacket = INITCODE;
+	send(tSock, (char*)&HelloPacket, 4, 0);
+	Init = TRUE;
+
+	return tSock;
+}
+
+unsigned int CPSock::ConnectBillServer(char* HostAddr, int Port, int ip, int WSA)
+{
+	nRecvPosition = 0;
+	nSendPosition = 0;
+	nProcPosition = 0;
+    if(Sock != 0)
+		CloseSocket();
+	
+	SOCKET tSock = socket( AF_INET, SOCK_STREAM, 0);
+	if(tSock == INVALID_SOCKET)
+		return FALSE;
+
+	SOCKADDR_IN local_sin;
+	memset(&local_sin, 0, sizeof(local_sin));
+
+	local_sin.sin_family		= AF_INET;
+	local_sin.sin_addr.s_addr	= ip;
+	local_sin.sin_port			= 0;       
+	if(bind(tSock, (struct sockaddr FAR *)&local_sin, sizeof(local_sin)) == SOCKET_ERROR)
+	{
+		local_sin.sin_port = ntohs((unsigned short)(ConnectPort + 6000));
+		if(bind(tSock, (struct sockaddr FAR *)&local_sin, sizeof(local_sin)) == SOCKET_ERROR)
+		{
+			ConnectPort = ConnectPort + 10;
+			local_sin.sin_port = ntohs((unsigned short)(ConnectPort + 6000));
+			if(bind(tSock, (struct sockaddr FAR *)&local_sin, sizeof(local_sin)) == SOCKET_ERROR)
+			{
+				MessageBox(NULL, "Binding fail", "ERROR", MB_OK);	
+				closesocket(tSock);
+				return FALSE;
+			}
+		}
+	}
+
+	char msg[256];
+	sprintf(msg, "sock:%d ip:%d.%d.%d.%d port:%d-%d", tSock, local_sin.sin_addr.S_un.S_un_b.s_b1, local_sin.sin_addr.S_un.S_un_b.s_b2, local_sin.sin_addr.S_un.S_un_b.s_b3, local_sin.sin_addr.S_un.S_un_b.s_b4, local_sin.sin_port, ConnectPort); 
+	ConnectPort++;
+
+	SOCKADDR_IN remote_sin;
+	memset(&remote_sin, 0, sizeof(remote_sin));
+
+	remote_sin.sin_addr.s_addr = inet_addr(HostAddr);
+	remote_sin.sin_family = AF_INET;
+	remote_sin.sin_port = ntohs((unsigned short)Port);       
+	if(connect(tSock, (struct sockaddr FAR *)&remote_sin, sizeof(remote_sin)) < 0)       
+	{
+		sprintf(msg, "sock:%d ip:%d.%d.%d.%d port:%d-%d", tSock, remote_sin.sin_addr.S_un.S_un_b.s_b1, remote_sin.sin_addr.S_un.S_un_b.s_b2, remote_sin.sin_addr.S_un.S_un_b.s_b3, remote_sin.sin_addr.S_un.S_un_b.s_b4, remote_sin.sin_port, Port); 
+		closesocket(tSock);
+		Sock = 0;
+		return FALSE;
+	}
+
+	sprintf(msg, "sock:%d ip:%d.%d.%d.%d port:%d-%d", tSock, remote_sin.sin_addr.S_un.S_un_b.s_b1, remote_sin.sin_addr.S_un.S_un_b.s_b2, remote_sin.sin_addr.S_un.S_un_b.s_b3, remote_sin.sin_addr.S_un.S_un_b.s_b4, remote_sin.sin_port, Port);
+    if(WSAAsyncSelect(tSock, hWndMain, WSA, FD_READ | FD_CLOSE) > 0) 
+	{
+		closesocket(tSock);
+		Sock = 0;
+		return FALSE;
+	}
+
+	Sock = tSock;
+	return tSock;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       Receive
+//
+/////////////////////////////////////////////////////////////////////////
+BOOL CPSock::Receive(void)
+{
+	int Rest = RECV_BUFFER_SIZE - nRecvPosition;
+	int tReceiveSize = recv(Sock, (char*)(pRecvBuffer + nRecvPosition), Rest, 0);
+	if(tReceiveSize == SOCKET_ERROR)
+		return FALSE;
+
+	if(tReceiveSize == Rest)
+	{
+		//Não entendi o codigo TM 1.2 -> 0041703E
+		return FALSE;
+	}
+
+	nRecvPosition = nRecvPosition + tReceiveSize;
+	return TRUE;
+}
+
+char* CPSock::ReadMessage(int* ErrorCode, int* ErrorType)
+{
+	*ErrorCode = 0;
+
+	if(nProcPosition >= nRecvPosition)
+	{
+	    nRecvPosition = 0;
+		nProcPosition = 0;
+		return NULL;
+	}
+
+	if(Init == 0)
+	{
+		if((nRecvPosition - nProcPosition) < 4)
+			return NULL;
+
+		int HelloPacket = *(int*)(pRecvBuffer + nProcPosition);
+		if(HelloPacket != INITCODE)
+		{
+			*ErrorCode = 2;
+			*ErrorType = HelloPacket;
+			CloseSocket();
+			return NULL;
+		}
+
+		Init = TRUE;
+		nProcPosition = nProcPosition + 4;
+	}
+
+	if((nRecvPosition - nProcPosition) < 12)
+		return NULL;
+
+	unsigned short Size = *((unsigned short*)(pRecvBuffer + nProcPosition));
+	unsigned short CheckSum = *((unsigned char*)(pRecvBuffer + nProcPosition + 2));
+
+	if(Size > MAX_MESSAGE_SIZE || Size < sizeof(HEADER))
+	{
+	    nRecvPosition=	0;
+	    nProcPosition=	0;
+		*ErrorCode   =	2;
+		*ErrorType   =	Size;
+		return NULL;
+	}
+
+	unsigned short Rest = nRecvPosition - nProcPosition;
+	if(Size > Rest)
+		return NULL;
+
+	char *pMsg = &(pRecvBuffer[nProcPosition]);
+	nProcPosition = nProcPosition + Size;
+	if(nRecvPosition <= nProcPosition)
+	{
+	    nRecvPosition = 0;
+		nProcPosition = 0;
+	}
+
+	unsigned int i;
+    int pos, Key;
+    int sum1 = 0, sum2 = 0;
+    pos = pKeyWord[CheckSum * 2];
+    for(i = 4; i < Size; i++, pos++)
+    {
+		sum1 += pMsg[i];
+        Key = pKeyWord[((pos & 0xFF) * 2) + 1];
+        switch(i & 3)
+        {
+			case 0:
+				Key <<= 1;
+				Key &= 255;
+				pMsg[i] -= Key;
+				break;
+			case 1:
+				Key >>= 3;
+				Key &= 255;
+				pMsg[i] += Key;
+				break;
+			case 2:
+				Key <<= 2;
+				Key &= 255;
+				pMsg[i] -= Key;
+				break;
+			case 3: default:
+				Key >>= 5;
+				Key &= 255;
+				pMsg[i] += Key;
+				break;
+        }
+        sum2 += pMsg[i]; 
+	}
+
+    sum2 &= 255;
+    sum1 &= 255;
+	if(sum2 == sum1)
+		return FALSE;
+
+	*ErrorCode = 1;
+	*ErrorType = Size;
+
+	return pMsg;
+}
+
+char* CPSock::ReadBillMessage(int* ErrorCode, int* ErrorType)
+{     
+	*ErrorCode = 0;
+	*ErrorType = 0;
+
+	if(nProcPosition >= nRecvPosition)
+	{
+		nRecvPosition = 0;
+		nProcPosition = 0;
+		return NULL;
+	}
+	 
+	if((nRecvPosition - nProcPosition) < g_cGame2)
+		return NULL;
+
+	char* pMsg = &(pRecvBuffer[nProcPosition]);
+	nProcPosition = nProcPosition + g_cGame2;
+
+	if(nRecvPosition <= nProcPosition)
+	{
+		nRecvPosition = 0;
+		nProcPosition = 0;
+	}
+
+	return pMsg;
+}
+
+BOOL CPSock::SendBillMessage(char* Msg)
+{
+	if((nSendPosition + g_cGame) >= SEND_BUFFER_SIZE)
+		 return FALSE;
+
+	for(int i = 0; i < g_cGame; i++)
+	{
+		pSendBuffer[nSendPosition + i] = Msg[i];
+	}
+
+	nSendPosition = nSendPosition + g_cGame;
+	BOOL Err = SendMessage();
+	return Err;
+}
+
+BOOL CPSock::AddMessage(char* pMsg, int Size)
+{
+	char temp[256];
+	HEADER* m = (HEADER*)pMsg;
+	if(Size < 0 || Size > MAX_MESSAGE_SIZE)
+		return FALSE;
+
+	if((nSendPosition + Size) >= SEND_BUFFER_SIZE)
+	{
+		sprintf(temp, "err, add buffer full - SendPosition %d Size %d OpCode 0x%X Socket %d", nSendPosition, Size, m->PacketId, Sock);
+		Log(temp, "-system", 0);
+		return FALSE;
+	}
+	
+	if(Sock <= 0)
+	{
+		sprintf(temp, "err, add buffer invalid - SendPosition %d Size %d OpCode 0x%X Socket %d", nSendPosition, Size, m->PacketId, Sock);
+		Log(temp, "-system", 0);
+		return FALSE;
+	}
+
+	unsigned int i;
+    int pos, Key, rand_key;
+    int sum1 = 0, sum2 = 0;
+    rand_key = (rand() % 255);
+	m->Size = Size;
+	m->Key = rand_key;
+	m->CheckSum = 0;
+	m->TimeStamp = CurrentTime;
+	LastSendTime = CurrentTime;
+
+	MSG_STANDARD* Msg = (MSG_STANDARD*)pMsg;
+	if(BASE_CheckPacket(Msg) != 0)
+	{
+		sprintf(temp, "**PACKET_DEBUG** Type:0x%x Size:%d", Msg->Header.PacketId, Msg->Header.Size);
+		Log(temp, "-system", 0);
+	}
+
+	pos = pKeyWord[rand_key * 2];
+    for(i = 4; i < Size; i++, pos++)
+    {
+        Key = pKeyWord[((pos & 0xFF) * 2) + 1];
+        switch(i & 3)
+        {
+        case 0:
+            Key *= 2;
+            Key &= 255;
+            pSendBuffer[nSendPosition+i] = pMsg[i] + Key;
+            break;
+        case 1:
+            Key >>= 3;
+            Key &= 255;
+            pSendBuffer[nSendPosition+i] = pMsg[i] - Key;
+            break;
+        case 2:
+            Key *= 4;
+            Key &= 255;
+            pSendBuffer[nSendPosition+i] = pMsg[i] + Key;
+            break;
+        default: case 3:
+            Key >>= 5;
+            Key &= 255;
+            pSendBuffer[nSendPosition+i] = pMsg[i] - Key;
+            break;
+        }
+        sum1 += pMsg[i];
+        sum2 += pSendBuffer[nSendPosition+i];
+    }
+    sum2 &= 0xFF;
+    sum1 &= 0xFF;
+    m->CheckSum = ((sum2 - sum1) & 255);
+    memcpy(pSendBuffer + nSendPosition, pMsg, 4);
+
+	nSendPosition = nSendPosition + Size;
+
+	return TRUE;
+}
+
+void CPSock::RefreshRecvBuffer(void)
+{
+	int left = nRecvPosition - nProcPosition;
+	if(left <= 0)
+		return;
+
+	memcpy(pRecvBuffer, pRecvBuffer + nProcPosition, left);
+	nProcPosition = 0;
+	nRecvPosition = nRecvPosition - left;
+}
+
+void CPSock::RefreshSendBuffer(void)
+{
+	int left = nSendPosition - nSentPosition;
+	if(left <= 0)
+		return;
+
+	memcpy(pSendBuffer, pSendBuffer + nSentPosition, left);
+	nSentPosition = 0;
+	nSendPosition = nSendPosition - left;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       SendMessage
+//
+/////////////////////////////////////////////////////////////////////////
+BOOL CPSock::SendMessage(void)
+{
+	char temp[256];
+	if(Sock <= 0)
+	{
+		nSendPosition = 0;
+		nSentPosition = 0;
+		return FALSE;
+	}
+
+	if(nSentPosition > 0)
+		RefreshSendBuffer();
+
+    if(nSendPosition > SEND_BUFFER_SIZE || nSendPosition < 0 || Sock < 0)
+    {	
+		sprintf(temp,"err, send1 %d %d Socker %d", nSendPosition, nSentPosition, Sock);
+		Log(temp, "-system", 0);
+
+		nSendPosition = 0;
+		nSentPosition = 0;
+		return FALSE;
+	}
+
+	if(nSentPosition > nSendPosition || nSentPosition >= SEND_BUFFER_SIZE || nSentPosition < 0)
+	{
+		sprintf(temp, "err, send2 %d %d Socket %d", nSendPosition, nSentPosition, Sock);
+		Log(temp, "-system", 0);
+
+		nSendPosition = 0;
+		nSentPosition = 0;
+	}
+
+	for(int i = 0; i < 1; i++)
+	{
+		int err = 0;
+		int	Left = nSendPosition - nSentPosition;
+		int tSend = send(Sock, pSendBuffer + nSentPosition, Left, 0);
+		if(tSend != SOCKET_ERROR)
+			nSentPosition = nSentPosition + tSend;
+		else
+			err = WSAGetLastError();
+
+		if(nSentPosition >= nSendPosition)
+		{
+			if(tSend != SOCKET_ERROR)
+			{
+				nSendPosition = 0;
+				nSentPosition = 0;
+
+				return TRUE;
+			}
+		}
+	}
+
+	if(nSendPosition >= SEND_BUFFER_SIZE)
+		return FALSE;
+
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+//                       SendOneMessage
+//
+/////////////////////////////////////////////////////////////////////////
+BOOL CPSock::SendOneMessage(char* Msg, int Size)
+{	
+	BOOL ret = AddMessage(Msg, Size);
+	ret = SendMessage();
+
+	return ret;
+}

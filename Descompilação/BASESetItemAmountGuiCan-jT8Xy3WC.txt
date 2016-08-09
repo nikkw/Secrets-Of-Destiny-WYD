@@ -1,0 +1,34 @@
+void BASE_SetItemAmount(STRUCT_ITEM* item, int amount) //00405200 - ok
+{
+	if(item->EF1 == EF_AMOUNT || item->EF2 == EF_AMOUNT || item->EF3 == EF_AMOUNT)
+	{
+		if(item->EF1 == EF_AMOUNT)
+			item->EFV1 = amount;
+		else if(item->EF2 == EF_AMOUNT)
+			item->EFV2 = amount;
+		else
+			item->EFV3 = amount;
+
+		return;
+	}
+
+	if(item->EF1 == 0 || item->EF2 == 0 || item->EF3 == 0)
+	{
+		if(item->EF1 == 0)
+		{
+			item->EF1 = EF_AMOUNT;
+			item->EFV1 = amount;
+
+		}
+		else if(item->EF2 == 0)
+		{
+			item->EF2 = EF_AMOUNT;
+			item->EFV2 = amount;
+		}
+		else
+		{
+			item->EF3 = EF_AMOUNT;
+			item->EFV3 = amount;
+		}
+	}
+}

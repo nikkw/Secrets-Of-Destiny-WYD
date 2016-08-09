@@ -1,0 +1,21 @@
+int BASE_GetItemSancSuccess(STRUCT_ITEM* item) //00404E20 - ok;
+{
+	if(item->Index >= 2330 && item->Index < 2390)
+		return FALSE;
+
+	int ret = FALSE;
+	if(item->EF1 == EF_SANC || item->EF2 == EF_SANC || item->EF3 == EF_SANC)
+	{
+		if(item->EF1 == EF_SANC)
+			ret = item->EFV1;
+		else if(item->EF2 == EF_SANC)
+			ret = item->EFV2;
+		else
+			ret = item->EFV3;
+	}
+
+	int getRef = ret & 0xFF;
+	getRef = getRef / 10;
+
+	return getRef;
+}

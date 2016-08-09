@@ -1,0 +1,32 @@
+// Adaptado para emulador, mas não ainda muito bom, se bem que está retornando valores corretos
+int GetExpApply(int exp, int attackerId, int targetId)
+{
+	stSpawn *spwAttacker = &Spawn[attackerId];
+	stSpawn *spwTarget   = &Spawn[ targetId ];
+	
+	int attacker = spwAttacker->Character.Status.Level;
+	int target = spwTarget->Character.Status.Level;
+
+	if(attacker >= MAX_LEVEL || target >= MAX_LEVEL || attacker < 0 || target < 0)
+		return exp;
+
+	attacker++;
+	target++;
+
+	if(spwAttacker->Character.Game.ClassMaster >= CELESTIAL)
+		attacker += (600 + ((CELESTIAL - SUBCELESTIAL) * 50));
+	
+    int	multiexp = target * 100 / attacker;		
+	if(multiexp < 80 && attacker >= 50)
+		multiexp = ((multiexp - 80) * 2) + 100;
+	else if(multiexp > 200)			
+		multiexp = 200;
+	else if(multiexp < 0)		
+		multiexp = 0;
+
+	exp = exp * multiexp / 100;
+	if(Game.BonusEXP != 0)
+		exp += exp * Game.BonusEXP / 100;
+
+	return exp ;
+}

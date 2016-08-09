@@ -1,0 +1,27 @@
+int BASE_GetGuild(STRUCT_ITEM* item) //00408bc0 - ok
+{
+	int hword = FALSE;
+	int lword = FALSE;
+	if(item->EF1 == EF_HWORDGUILD || item->EF2 == EF_HWORDGUILD || item->EF3 == EF_HWORDGUILD)
+	{
+		if(item->EF1 == EF_HWORDGUILD) 
+			hword = (unsigned char)item->EFV1;
+		else if(item->EF2 == EF_HWORDGUILD)
+			hword = (unsigned char)item->EFV2;
+		else
+			hword = (unsigned char)item->EFV3;
+	}
+
+	if(item->EF1 == EF_LWORDGUILD || item->EF2 == EF_LWORDGUILD || item->EF3 == EF_LWORDGUILD)
+	{
+		if(item->EF1 == EF_LWORDGUILD)
+			lword = (unsigned char)item->EFV1;
+		else if(item->EF2 == EF_LWORDGUILD)
+			lword = (unsigned char)item->EFV2;
+		else
+			lword = (unsigned char)item->EFV3;
+	}
+
+	int value = ((hword << 8) + lword);
+	return value;
+}

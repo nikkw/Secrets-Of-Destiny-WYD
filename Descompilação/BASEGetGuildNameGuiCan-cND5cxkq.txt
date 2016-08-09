@@ -1,0 +1,33 @@
+void BASE_GetGuildName(int ServerGroup, unsigned short usGuild, char* szGuildName) //004027d0
+{
+	int ServerID = ServerGroup;
+	int GuildID = ((usGuild >> 0xC) & 0xFFF); //004027FD
+	int GuildSize = ((usGuild >> 0xC) & 0xFFF); //0040280F
+	char* local4;
+	if(szGuildName != NULL)
+	{
+		if(ServerID < 0 && ServerID > 10 && GuildID < 0 && GuildID > 16)
+			return;
+
+		if(GuildSize >= 0 && GuildSize < 4096 && *(&g_pGuildName[ServerID][GuildID][GuildSize])) //conferir 0040284F
+		{
+			memcpy(szGuildName, &g_pGuildName[ServerID][GuildID][GuildSize], 0xC);
+			BASE_UnderBarToSpace(szGuildName);
+		}
+		else
+		{
+			memset(&local4, 0, 3);
+			int local5 = GuildID << 1;
+			memcpy(local4, g_pGuildIndex[local5], 2);
+			sprintf(szGuildName, "%s", local4);
+
+			local5 = (((usGuild >> 6) & 0x3F) << 1);
+			memcpy(local4, g_pGuildMark[local5], 2);
+			strcat(szGuildName, local4);
+
+			local5 = ((usGuild & 0x3F) << 1);
+			memcpy(local4, g_pGuildMark[local5], 2);
+			strcat(szGuildName, local4);
+		}
+	}
+}

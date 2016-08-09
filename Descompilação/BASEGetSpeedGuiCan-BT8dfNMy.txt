@@ -1,0 +1,10 @@
+int BASE_GetSpeed(STRUCT_SCORE* score) //00402250 - ok
+{
+	int speed = score->Reserved & 0xF;
+	if(speed < 1)
+		speed = 1;
+	if(speed > 6)
+		speed = 6;
+
+	return speed;
+}

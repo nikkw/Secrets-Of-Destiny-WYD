@@ -1,0 +1,20 @@
+void CheckIdle(int clientId)
+{
+	static int SecCounter = 0; // 1.2 758FAE8   1.7 8BF1834
+	static char temp[1024]; // 1.2 - 751C928
+	static int UserCount; // 1.2 4C7BD0
+	INT32 LOCAL_1 = SecCounter;
+
+	INT32 LOCAL_2 = Users[clientId].LastReceiveTime;
+
+	if(LOCAL_2 > LOCAL_1)
+		Users[clientId].LastReceiveTime = SecCounter;
+
+	if(LOCAL_2 < (LOCAL_1 - 1440))
+	{
+		sprintf(temp, "sys,disconnect last:%d server %d mode %d conn:%d", Users[clientId].LastReceiveTime, SecCounter, Users[clientId].Status, clientId);
+
+		BASE_Log(temp, Users[UserCount].Username, 0);
+		CloseUser_OL2(clientId);
+	}
+}

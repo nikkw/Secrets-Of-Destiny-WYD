@@ -1,0 +1,48 @@
+void BASE_SortTradeItem(STRUCT_ITEM *AlvoBufferItem,int ItemFunction)
+{
+	int Unk[MAX_TRADE];
+
+	memset(Unk , -1 , sizeof (int) * MAX_TRADE);
+
+	//local1
+	int i;
+
+	for(i=0; i<MAX_TRADE; i++)
+	{
+		if(AlvoBufferItem[i].Index == 0)
+		{
+			Unk[i] = -1;
+			continue;
+		}
+
+		Unk[i] = BASE_GetItemAbility(&AlvoBufferItem[i],ItemFunction);
+	}
+
+	STRUCT_ITEM item[MAX_TRADE];
+
+	memset(item , 0 , sizeof (STRUCT_ITEM) * MAX_TRADE);
+
+	for(i=0; i<MAX_TRADE; i++)
+	{
+		int local26 = 0;
+		int local27 = -1;
+
+		for(int x=0; x<MAX_TRADE; x++)
+		{
+			if(Unk[x] > -1)
+			{
+				local26 = x;
+				local27 = Unk[x];
+			}
+		}
+
+		if(local27 == -1)
+			break;
+
+		Unk[local26] = -1;
+
+		item[i] = AlvoBufferItem[local26];
+	}
+
+	memcpy(AlvoBufferItem, item, sizeof (STRUCT_ITEM) * MAX_TRADE);
+}

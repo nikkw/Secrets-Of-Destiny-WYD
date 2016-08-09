@@ -1,0 +1,73 @@
+void Challange(int arg1, int arg2, int arg3)
+{
+	//0x004015DC;
+	st_Mob *player = GetMobFromIndex(arg1);
+
+	int LOCAL_1 = 0;
+
+	if(arg1 <= 0 || arg1 >= 100)
+		return;
+
+	int LOCAL_2 = 0;
+
+	for(; LOCAL_2 < 0x03F; LOCAL_2++)
+	{
+		int LOCAL_3 = player->Inventory[LOCAL_2].Index;
+
+		if(LOCAL_3 == arg2)
+			LOCAL_1++;
+
+		if(LOCAL_1 >= 0x0A)
+			break;
+	}
+
+	if(LOCAL_1 < 0x0A)
+		return;
+
+	int LOCAL_4 = 0;
+	for(LOCAL_2 = 0; LOCAL_2 < 0x03F; LOCAL_2++)
+	{
+		int LOCAL_5 = player->Inventory[LOCAL_2].Index;
+
+		if(LOCAL_5 != arg2)
+			continue;
+
+		BASE_ClearItem(&player->Inventory[LOCAL_2].Index);
+
+		LOCAL_4++;
+
+		if(LOCAL_4 >= 0x0A)
+			break;
+	}
+
+	// Revisar isso aqui depois
+	int LOCAL_7 = arg3,
+		LOCAL_6 = 0x3B + (Rand() % 100 + 100), 
+	// Revisar isso ali depois
+	    LOCAL_8  = 0;
+	
+	for(; LOCAL_8 < 0x03F; LOCAL_8++)
+	{
+		int LOCAL_9  = LOCAL_8 % 9,
+			LOCAL_10 = LOCAL_8 / 9,
+			LOCAL_11 = -1,
+			LOCAL_12 = BASE_CanCarry(&LOCAL_7, &player->Inventory[LOCAL_8], LOCAL_9, LOCAL_10, LOCAL_11);
+
+		if(LOCAL_12 != 1)
+			break;
+	}
+	
+	if(LOCAL_8 < 0 || LOCAL_8 >= 0x3F)
+	{
+		int LOCAL_13 = player->TargetX, 
+		    LOCAL_14 = player->TargetY;
+
+	    CreateItem(LOCAL_13, LOCAL_14, &LOCAL_7, Rand() & 80000003, 1); 
+
+		return;
+	}
+
+	player->Inventory[LOCAL_8].Index = LOCAL_7;
+
+	player->Inventory[LOCAL_8].EF1 = LOCAL_6;
+}

@@ -1,0 +1,11 @@
+int BASE_GetSpeed(st_Status *status)
+{
+	int local1 = status->Move.Speed;
+
+	if(local1 < 1)
+		local1 = 1;
+	else if(local1 > 6)
+		local1 = 6;
+
+	return local1;
+}

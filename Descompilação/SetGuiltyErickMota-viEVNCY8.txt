@@ -1,0 +1,18 @@
+void SetGuilty(int Cid, int arg_2)
+{
+	//0x00401488
+	
+	if(Cid <= 0 || Cid >= 100)
+	    return;
+
+	if(arg_2 < 0)
+		arg_2 = 0;
+	else if(arg_2 > 50)
+		arg_2 = 50;
+
+	int LOCAL_1 = arg_2;
+
+	st_Mob *player = GetMobFromIndex(Cid);
+
+	player->Inventory[63].EFV2 = LOCAL_1;
+}

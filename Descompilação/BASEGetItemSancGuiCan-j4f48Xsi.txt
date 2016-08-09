@@ -1,0 +1,33 @@
+int BASE_GetItemSanc(STRUCT_ITEM* item) //00404ca0 - ok - atualizada(reconhecendo refinações +10+ e tinturas)
+{
+	int ret = FALSE;
+	if(item->Index >= 2360 && item->Index < 2390)
+	{
+		ret = item->EF3 / 10;
+		if(ret > 9)
+			ret = 9;
+
+		return ret;
+	}
+
+	if(item->Index >= 2330 && item->Index < 2360)
+		return FALSE;
+
+	if(item->EF1 == EF_SANC || (item->EF1 >= 116 && item->EF1 <= 125))
+		ret = item->EFV1;
+	else if(item->EF2 == EF_SANC || (item->EF2 >= 116 && item->EF2 <= 125))
+		ret = item->EFV2;
+	else if(item->EF3 == EF_SANC || (item->EF3 >= 116 && item->EF3 <= 125))
+		ret = item->EFV3;
+
+	if(ret >= 230)
+    {
+        ret = 10 + ((ret - 230) / 4);
+        if(ret > 15)
+            ret = 15;
+    }
+    else
+        ret = ret / 10;
+
+	return ret;
+}

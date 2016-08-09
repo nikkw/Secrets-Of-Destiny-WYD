@@ -1,0 +1,21 @@
+int BASE_GetMaxAbility(STRUCT_MOB* mob, unsigned char Type) //00405800 - ok
+{
+	int ret = FALSE;
+	int ItemAbility = FALSE;
+	
+	for(int i = 0; i < MAX_EQUIP; i++)
+	{
+		int ItemID = mob->Equip[i].Index;
+		if(ItemID == 0)
+			continue;
+
+		ItemAbility = BASE_GetItemAbility(&mob->Equip[i], Type);
+		if(ret >= ItemAbility)
+			continue;
+
+		ret = ItemAbility;
+		break;
+	}
+
+	return ret;
+}

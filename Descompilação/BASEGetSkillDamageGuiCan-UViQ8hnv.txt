@@ -1,0 +1,22 @@
+int BASE_GetSkillDamage(int damage, int defense, int combat) //00402DD0 - ok
+{
+	int calcSkillDmg = damage - (defense >> 1);
+	if(combat > 15)
+		combat = 15;
+
+	int calcRand = 21 - combat;
+	int incDmg = (rand() % calcRand) + combat + 90;
+
+	calcSkillDmg = (calcSkillDmg * incDmg) / 100;
+	if(calcSkillDmg < -50)
+		calcSkillDmg = 0;
+	else if(calcSkillDmg >= -50 && calcSkillDmg < 0)
+		calcSkillDmg = (calcSkillDmg + 50) / 10;
+	else if(calcSkillDmg >= 0 && calcSkillDmg <= 45)
+		calcSkillDmg = ((calcSkillDmg * 5) >> 2) + 5;
+
+	if(calcSkillDmg <= 0)
+		calcSkillDmg = 1;
+
+	return calcSkillDmg;
+}
